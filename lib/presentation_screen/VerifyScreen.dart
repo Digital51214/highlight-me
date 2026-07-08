@@ -1,236 +1,11 @@
-// import 'dart:async';
-// import 'package:flutter/material.dart';
-// import 'package:get/get.dart';
-// import 'package:highlights/presentation_screen/UpdatePasswordScreen.dart';
-// import 'package:highlights/widgets/Backbutton.dart';
-// import 'package:highlights/widgets/ElevatedButton.dart';
-//
-// class Verifyscreen extends StatefulWidget {
-//   const Verifyscreen({super.key});
-//
-//   @override
-//   State<Verifyscreen> createState() => _VerifyscreenState();
-// }
-//
-// class _VerifyscreenState extends State<Verifyscreen> {
-//   final List<TextEditingController> _otpControllers =
-//   List.generate(6, (index) => TextEditingController());
-//
-//   final List<FocusNode> _focusNodes =
-//   List.generate(6, (index) => FocusNode());
-//
-//   Timer? _timer;
-//   int _secondsRemaining = 32;
-//
-//   @override
-//   void initState() {
-//     super.initState();
-//     _startTimer();
-//   }
-//
-//   void _startTimer() {
-//     _timer?.cancel();
-//     _secondsRemaining = 32;
-//
-//     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-//       if (_secondsRemaining == 0) {
-//         timer.cancel();
-//       } else {
-//         setState(() {
-//           _secondsRemaining--;
-//         });
-//       }
-//     });
-//   }
-//
-//   String _formattedTime() {
-//     final seconds = _secondsRemaining.toString().padLeft(2, '0');
-//     return "00:$seconds";
-//   }
-//
-//   String get enteredOtp {
-//     return _otpControllers.map((e) => e.text).join();
-//   }
-//
-//   @override
-//   void dispose() {
-//     _timer?.cancel();
-//     for (final controller in _otpControllers) {
-//       controller.dispose();
-//     }
-//     for (final node in _focusNodes) {
-//       node.dispose();
-//     }
-//     super.dispose();
-//   }
-//
-//   void _onOtpChanged(String value, int index) {
-//     if (value.isNotEmpty) {
-//       if (index < 5) {
-//         _focusNodes[index + 1].requestFocus();
-//       } else {
-//         _focusNodes[index].unfocus();
-//       }
-//     }
-//   }
-//
-//   void _onBackspace(String value, int index) {
-//     if (value.isEmpty && index > 0) {
-//       _focusNodes[index - 1].requestFocus();
-//     }
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     final size = MediaQuery.of(context).size;
-//
-//     return Scaffold(
-//       backgroundColor: const Color(0xff0F1012),
-//       body: SafeArea(
-//         child: SingleChildScrollView(
-//           padding: EdgeInsets.symmetric(
-//             horizontal: size.width * 0.055,
-//             vertical: size.height * 0.012,
-//           ),
-//           child: Column(
-//             crossAxisAlignment: CrossAxisAlignment.start,
-//             children: [
-//               SizedBox(height: size.height * 0.01),
-//
-//               const CustomBackButtonWidget(),
-//
-//               SizedBox(height: size.height * 0.07),
-//
-//               Center(
-//                 child:Image(image: AssetImage("assets/images/Vector.png"),height: size.height*0.2,width: double.infinity,),
-//
-//       ),
-//
-//               SizedBox(height: size.height * 0.06),
-//
-//               Text(
-//                 "Enter Code",
-//                 style: TextStyle(
-//                   color: Colors.white,
-//                   fontSize: size.width * 0.068,
-//                   fontWeight: FontWeight.w800,
-//                   height: 1.1,
-//                 ),
-//               ),
-//
-//               SizedBox(height: size.height * 0.01),
-//
-//               Text(
-//                 "We have sent you a code to your email\nlexabravo@yahoo.com",
-//                 style: TextStyle(
-//                   color: Colors.white60,
-//                   fontSize: size.width * 0.033,
-//                   fontWeight: FontWeight.w400,
-//                   height: 1.25,
-//                 ),
-//               ),
-//
-//               SizedBox(height: size.height * 0.025),
-//
-//               Row(
-//                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                 children: List.generate(
-//                   6,
-//                       (index) => _buildOtpField(size, index),
-//                 ),
-//               ),
-//
-//               SizedBox(height: size.height * 0.045),
-//
-//               Center(
-//                 child: GestureDetector(
-//                   onTap: _secondsRemaining == 0
-//                       ? () {
-//                     setState(() {
-//                       for (final controller in _otpControllers) {
-//                         controller.clear();
-//                       }
-//                     });
-//                     _startTimer();
-//                   }
-//                       : null,
-//                   child: Text(
-//                     _secondsRemaining == 0
-//                         ? "Resend Code"
-//                         : "Resend in ${_formattedTime()}",
-//                     style: TextStyle(
-//                       color: _secondsRemaining == 0
-//                           ? const Color(0xff62AFC1)
-//                           : Colors.white60,
-//                       fontSize: size.width * 0.043,
-//                       fontWeight: FontWeight.w400,
-//                     ),
-//                   ),
-//                 ),
-//               ),
-//
-//               SizedBox(height: size.height * 0.05),
-//               ElevatedButton1(text: "Verify Code", onPressed: (){
-//                 Get.to(UpdatePasswordscreen(),
-//                   transition: Transition.noTransition,
-//                   duration: Duration.zero,);
-//               }),
-//               SizedBox(height: size.height * 0.03),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-//
-//   Widget _buildOtpField(Size size, int index) {
-//     return Container(
-//       width: size.width * 0.135,
-//       height: size.height * 0.06,
-//       alignment: Alignment.center, // ⭐ IMPORTANT
-//       decoration: BoxDecoration(
-//         color: const Color(0xff15262B),
-//         borderRadius: BorderRadius.circular(size.width * 0.04),
-//         border: Border.all(
-//           color: const Color(0xff3EA8C7),
-//           width: size.width * 0.0028,
-//         ),
-//       ),
-//       child: TextField(
-//         controller: _otpControllers[index],
-//         focusNode: _focusNodes[index],
-//         keyboardType: TextInputType.number,
-//         textAlign: TextAlign.center,
-//         textAlignVertical: TextAlignVertical.center,
-//         maxLength: 1,
-//         style: TextStyle(
-//           color: Colors.white,
-//           fontSize: size.width * 0.05,
-//           fontWeight: FontWeight.w600,
-//         ),
-//         cursorColor: const Color(0xff62AFC1),
-//         decoration: const InputDecoration(
-//           counterText: "",
-//           border: InputBorder.none,
-//         ),
-//         onChanged: (value) {
-//           if (value.isEmpty) {
-//             _onBackspace(value, index);
-//           } else {
-//             _onOtpChanged(value, index);
-//           }
-//           setState(() {});
-//         },
-//       ),
-//     );
-//   }
-// }
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:highlights/basic_files/buttons.dart';
 import 'package:highlights/presentation_screen/UpdatePasswordScreen.dart';
 import 'package:highlights/widgets/Backbutton.dart';
 import 'package:highlights/widgets/ElevatedButton.dart';
+import '../Contollers/auth_controller.dart';
 
 class Verifyscreen extends StatefulWidget {
   const Verifyscreen({super.key});
@@ -249,51 +24,60 @@ class _VerifyscreenState extends State<Verifyscreen> {
   Timer? _timer;
   int _secondsRemaining = 32;
 
+  final AuthController authController = Get.find<AuthController>();
+
+  // Pichli screen se aane wala data
+  String userEmail  = '';
+  int    userId     = 0;
+  String sentOtp    = ''; // Server ne jo OTP bheja
+
+  String? _otpError;
+
   @override
   void initState() {
     super.initState();
+
+    final args = Get.arguments;
+    if (args is Map) {
+      userEmail = args['email']?.toString() ?? '';
+      sentOtp   = args['otp']?.toString()   ?? '';
+      userId    = args['user_id'] is int
+          ? args['user_id']
+          : int.tryParse(args['user_id']?.toString() ?? '') ?? 0;
+    }
+
+    print("✅ VerifyScreen — userId: $userId, otp: $sentOtp, email: $userEmail");
     _startTimer();
   }
 
   void _startTimer() {
     _timer?.cancel();
     _secondsRemaining = 32;
-
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_secondsRemaining == 0) {
         timer.cancel();
       } else {
-        setState(() {
-          _secondsRemaining--;
-        });
+        setState(() => _secondsRemaining--);
       }
     });
   }
 
-  String _formattedTime() {
-    final seconds = _secondsRemaining.toString().padLeft(2, '0');
-    return "00:$seconds";
-  }
+  String _formattedTime() =>
+      "00:${_secondsRemaining.toString().padLeft(2, '0')}";
 
   @override
   void dispose() {
     _timer?.cancel();
-    for (final controller in _otpControllers) {
-      controller.dispose();
-    }
-    for (final node in _focusNodes) {
-      node.dispose();
-    }
+    for (final c in _otpControllers) c.dispose();
+    for (final n in _focusNodes) n.dispose();
     super.dispose();
   }
 
   void _onOtpChanged(String value, int index) {
-    if (value.isNotEmpty) {
-      if (index < 5) {
-        _focusNodes[index + 1].requestFocus();
-      } else {
-        _focusNodes[index].unfocus();
-      }
+    if (value.isNotEmpty && index < 5) {
+      _focusNodes[index + 1].requestFocus();
+    } else if (value.isNotEmpty && index == 5) {
+      _focusNodes[index].unfocus();
     }
   }
 
@@ -303,12 +87,65 @@ class _VerifyscreenState extends State<Verifyscreen> {
     }
   }
 
+  void _clearOtpFields() {
+    for (final c in _otpControllers) c.clear();
+    _focusNodes[0].requestFocus();
+  }
+
+  void _verifyOtp() {
+    FocusScope.of(context).unfocus();
+
+    final String enteredOtp =
+    _otpControllers.map((e) => e.text).join();
+
+    if (enteredOtp.length < 6) {
+      setState(() => _otpError = "Please enter the complete 6-digit code");
+      return;
+    }
+
+    if (userId == 0) {
+      setState(() => _otpError = "Session expired. Please go back and try again.");
+      return;
+    }
+
+    if (enteredOtp == sentOtp) {
+      setState(() => _otpError = null);
+
+      Get.to(
+            () => const UpdatePasswordscreen(),
+        arguments: {'userId': userId},
+        transition: Transition.noTransition,
+        duration: Duration.zero,
+      );
+    } else {
+      setState(() => _otpError = "Invalid code. Please try again.");
+      _clearOtpFields();
+    }
+  }
+
+  Future<void> _resendOtp() async {
+    setState(() => _otpError = null);
+    _clearOtpFields();
+
+    final result = await authController.sendForgotPasswordOtp(
+      email: userEmail,
+    );
+
+    if (result != null) {
+      setState(() {
+        userId  = result['user_id'];
+        sentOtp = result['otp'].toString();
+      });
+      _startTimer();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    double w = MediaQuery.of(context).size.width;
+    double h = MediaQuery.of(context).size.height;
 
-    // Theme references
-    final Color textColor = Theme.of(context).canvasColor;
+    final Color textColor    = Theme.of(context).canvasColor;
     final Color primaryColor = Theme.of(context).primaryColor;
 
     return Scaffold(
@@ -316,74 +153,78 @@ class _VerifyscreenState extends State<Verifyscreen> {
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(
-            horizontal: size.width * 0.055,
-            vertical: size.height * 0.012,
+            horizontal: w * (20.625 / 375), // 0.055 scaled ratio
+            vertical:   h * (9.72 / 810),    // 0.012 scaled ratio
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: size.height * 0.01),
-
+              SizedBox(height: h * (8.1 / 810)),
               const CustomBackButtonWidget(),
-
-              SizedBox(height: size.height * 0.07),
+              SizedBox(height: h * (56.7 / 810)),
 
               Center(
                 child: Image(
                   image: const AssetImage("assets/images/Vector.png"),
-                  height: size.height * 0.2,
+                  height: h * (162.0 / 810), // Mapped from size.height * 0.2
                   width: double.infinity,
                 ),
               ),
 
-              SizedBox(height: size.height * 0.06),
+              SizedBox(height: h * (48.6 / 810)),
 
               Text(
                 "Enter Code",
                 style: TextStyle(
                   color: textColor,
-                  fontSize: size.width * 0.068,
+                  fontSize: w * (25.5 / 375), // Mapped from size.width * 0.068
                   fontWeight: FontWeight.w800,
                   height: 1.1,
                 ),
               ),
 
-              SizedBox(height: size.height * 0.01),
+              SizedBox(height: h * (8.1 / 810)),
 
               Text(
-                "We have sent you a code to your email\nlexabravo@yahoo.com",
+                "We have sent you a code to your email\n$userEmail",
                 style: TextStyle(
                   color: textColor.withOpacity(0.6),
-                  fontSize: size.width * 0.033,
+                  fontSize: w * (12.375 / 375), // Mapped from size.width * 0.033
                   fontWeight: FontWeight.w400,
                   height: 1.25,
                 ),
               ),
 
-              SizedBox(height: size.height * 0.025),
+              SizedBox(height: h * (20.25 / 810)),
 
+              // OTP Fields
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: List.generate(
                   6,
-                      (index) => _buildOtpField(size, index, primaryColor, textColor),
+                      (index) => _buildOtpField(w, h, index, primaryColor, textColor),
                 ),
               ),
 
-              SizedBox(height: size.height * 0.045),
+              // Inline error
+              if (_otpError != null) ...[
+                SizedBox(height: h * (12.15 / 810)),
+                Text(
+                  _otpError!,
+                  style: TextStyle(
+                    color: Colors.redAccent,
+                    fontSize: w * (12.375 / 375),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
 
+              SizedBox(height: h * (36.45 / 810)),
+
+              // Resend
               Center(
                 child: GestureDetector(
-                  onTap: _secondsRemaining == 0
-                      ? () {
-                    setState(() {
-                      for (final controller in _otpControllers) {
-                        controller.clear();
-                      }
-                    });
-                    _startTimer();
-                  }
-                      : null,
+                  onTap: _secondsRemaining == 0 ? _resendOtp : null,
                   child: Text(
                     _secondsRemaining == 0
                         ? "Resend Code"
@@ -392,27 +233,23 @@ class _VerifyscreenState extends State<Verifyscreen> {
                       color: _secondsRemaining == 0
                           ? primaryColor
                           : textColor.withOpacity(0.5),
-                      fontSize: size.width * 0.043,
+                      fontSize: w * (16.125 / 375), // Mapped from size.width * 0.043
                       fontWeight: FontWeight.w400,
                     ),
                   ),
                 ),
               ),
 
-              SizedBox(height: size.height * 0.05),
+              SizedBox(height: h * (40.5 / 810)),
 
-              ElevatedButton1(
+              // Verify Button
+              RoundButton(
                 text: "Verify Code",
-                onPressed: () {
-                  Get.to(
-                    const UpdatePasswordscreen(),
-                    transition: Transition.noTransition,
-                    duration: Duration.zero,
-                  );
-                },
+                showArrow: false,
+                onTap : _verifyOtp,
               ),
 
-              SizedBox(height: size.height * 0.03),
+              SizedBox(height: h * (24.3 / 810)),
             ],
           ),
         ),
@@ -420,18 +257,19 @@ class _VerifyscreenState extends State<Verifyscreen> {
     );
   }
 
-  Widget _buildOtpField(Size size, int index, Color primary, Color textC) {
+  Widget _buildOtpField(double w, double h, int index, Color primary, Color textC) {
+    final bool hasError = _otpError != null;
+
     return Container(
-      width: size.width * 0.135,
-      height: size.height * 0.06,
+      width: w * (50.625 / 375),  // Evaluated from size.width * 0.135
+      height: h * (56.7 / 810),    // Evaluated from size.height * 0.07
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        // Dynamic background based on primary color
         color: primary.withOpacity(0.12),
-        borderRadius: BorderRadius.circular(size.width * 0.04),
+        borderRadius: BorderRadius.circular(w * (15.0 / 375)), // Evaluated from size.width * 0.04
         border: Border.all(
-          color: primary.withOpacity(0.6),
-          width: size.width * 0.0028,
+          color: hasError ? Colors.redAccent : primary.withOpacity(0.6),
+          width: w * (1.05 / 375), // Evaluated from size.width * 0.0028
         ),
       ),
       child: TextField(
@@ -443,7 +281,7 @@ class _VerifyscreenState extends State<Verifyscreen> {
         maxLength: 1,
         style: TextStyle(
           color: textC,
-          fontSize: size.width * 0.05,
+          fontSize: w * (18.75 / 375), // Mapped from size.width * 0.05
           fontWeight: FontWeight.w600,
         ),
         cursorColor: primary,
@@ -457,7 +295,8 @@ class _VerifyscreenState extends State<Verifyscreen> {
           } else {
             _onOtpChanged(value, index);
           }
-          setState(() {});
+          if (_otpError != null) setState(() => _otpError = null);
+          else setState(() {});
         },
       ),
     );

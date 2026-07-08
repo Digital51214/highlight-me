@@ -1,10 +1,9 @@
-import 'dart:async'; // Timer ke liye zaroori ha
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../Services/time_services.dart';
-
 
 class PostingWindowScreen extends StatefulWidget {
   const PostingWindowScreen({super.key});
@@ -20,7 +19,6 @@ class _PostingWindowScreenState extends State<PostingWindowScreen> {
   @override
   void initState() {
     super.initState();
-    // Har second UI update karne ke liye timer
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted) {
         setState(() {
@@ -32,18 +30,19 @@ class _PostingWindowScreenState extends State<PostingWindowScreen> {
 
   @override
   void dispose() {
-    _timer?.cancel(); // Memory leak se bachne ke liye timer cancel
+    _timer?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
+    double h = MediaQuery.of(context).size.height;
+
     final Color textColor = Theme.of(context).canvasColor;
     final Color primaryColor = Theme.of(context).primaryColor;
     final Color cardColor = Theme.of(context).cardColor;
 
-    // Time calculations
     String days = _timeLeft.inDays.toString().padLeft(2, '0');
     String hours = _timeLeft.inHours.remainder(24).toString().padLeft(2, '0');
     String minutes = _timeLeft.inMinutes.remainder(60).toString().padLeft(2, '0');
@@ -53,27 +52,27 @@ class _PostingWindowScreenState extends State<PostingWindowScreen> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          padding: EdgeInsets.symmetric(horizontal: w * (20.0 / 375)),
           child: Column(
             children: [
-              // Back Button (Original Logic)
+              // Back Button
               Align(
                 alignment: Alignment.centerLeft,
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 20),
+                  padding: EdgeInsets.only(top: h * (20.0 / 810)),
                   child: GestureDetector(
                     onTap: () => Get.back(),
                     child: Theme.of(context).brightness == Brightness.dark
-                        ? Image.asset('assets/images/icon.arrow.png', height: 48, width: 48)
+                        ? Image.asset('assets/images/icon.arrow.png', height: w * (48.0 / 375), width: w * (48.0 / 375))
                         : Container(
-                      height: 48,
-                      width: 48,
+                      height: w * (45.0 / 375),
+                      width: w * (45.0 / 375),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: primaryColor.withOpacity(0.15),
-                        border: Border.all(color: primaryColor.withOpacity(0.3)),
+                        border: Border.all(color: primaryColor.withOpacity(0.3), width: w * (1.0 / 375)),
                       ),
-                      child: Icon(Icons.arrow_back_ios_new, color: textColor, size: 22),
+                      child: Icon(Icons.arrow_back_ios_new, color: textColor, size: w * (22.0 / 375)),
                     ),
                   ),
                 ),
@@ -82,47 +81,51 @@ class _PostingWindowScreenState extends State<PostingWindowScreen> {
 
               // Central Card
               Container(
-                padding: const EdgeInsets.all(30),
+                padding: EdgeInsets.all(w * (30.0 / 375)),
                 decoration: BoxDecoration(
                   color: cardColor,
-                  borderRadius: BorderRadius.circular(40),
+                  borderRadius: BorderRadius.circular(w * (40.0 / 375)),
                   boxShadow: [
-                    BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 20, spreadRadius: 5)
+                    BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: w * (20.0 / 375),
+                        spreadRadius: w * (5.0 / 375)
+                    )
                   ],
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.lock_outline, size: 60, color: primaryColor),
-                    const SizedBox(height: 20),
+                    Icon(Icons.lock_outline, size: w * (60.0 / 375), color: primaryColor),
+                    SizedBox(height: h * (16.2 / 810)),
                     Text(
                       'Posting Window Is\nClosed.',
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.inter(fontSize: 26, fontWeight: FontWeight.w900, color: textColor),
+                      style: GoogleFonts.inter(fontSize: w * (26.0 / 375), fontWeight: FontWeight.w900, color: textColor),
                     ),
                     Text(
-                      'See you on Friday!', // Requirement: Window Friday ko khulti ha
-                      style: GoogleFonts.inter(fontSize: 22, color: primaryColor, fontWeight: FontWeight.w600),
+                      'See you on Friday!',
+                      style: GoogleFonts.inter(fontSize: w * (22.0 / 375), color: primaryColor, fontWeight: FontWeight.w600),
                     ),
-                    const SizedBox(height: 20),
+                    SizedBox(height: h * (16.2 / 810)),
                     Text(
                       'Weekend Moments are locked during the week to keep the excitement for the weekend.',
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.inter(color: textColor.withOpacity(0.5), fontSize: 13),
+                      style: GoogleFonts.inter(color: textColor.withOpacity(0.5), fontSize: w * (13.0 / 375)),
                     ),
-                    const SizedBox(height: 30),
+                    SizedBox(height: h * (24.3 / 810)),
 
-                    // Countdown Timer (Now Functional)
+                    // Countdown Timer
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        CountdownUnit(value: days, label: 'Days', color: textColor),
-                        CountdownUnit(value: hours, label: 'Hours', color: textColor),
-                        CountdownUnit(value: minutes, label: 'Minutes', color: textColor),
-                        CountdownUnit(value: seconds, label: 'Seconds', color: textColor),
+                        CountdownUnit(value: days, label: 'Days', color: textColor, w: w, h: h),
+                        CountdownUnit(value: hours, label: 'Hours', color: textColor, w: w, h: h),
+                        CountdownUnit(value: minutes, label: 'Minutes', color: textColor, w: w, h: h),
+                        CountdownUnit(value: seconds, label: 'Seconds', color: textColor, w: w, h: h),
                       ],
                     ),
-                    const SizedBox(height: 40),
+                    SizedBox(height: h * (32.4 / 810)),
 
                     // Action Button
                     ElevatedButton.icon(
@@ -132,12 +135,12 @@ class _PostingWindowScreenState extends State<PostingWindowScreen> {
                             backgroundColor: primaryColor,
                             colorText: Colors.white);
                       },
-                      icon: const Icon(Icons.notifications_active, color: Colors.white),
-                      label: Text('Notify Me When It Opens', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold)),
+                      icon: Icon(Icons.notifications_active, color: Colors.white, size: w * (20.0 / 375)),
+                      label: Text('Notify Me When It Opens', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: w * (14.0 / 375))),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: primaryColor,
-                        minimumSize: const Size(double.infinity, 55),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                        minimumSize: Size(double.infinity, h * (55.0 / 810)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(w * (30.0 / 375))),
                       ),
                     ),
                   ],
@@ -149,14 +152,14 @@ class _PostingWindowScreenState extends State<PostingWindowScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('👥 ', style: TextStyle(fontSize: 18)),
+                  Text('👥 ', style: TextStyle(fontSize: w * (18.0 / 375))),
                   Text(
                     '+12k People are waiting for the drop',
-                    style: GoogleFonts.inter(color: textColor.withOpacity(0.4), fontSize: 12),
+                    style: GoogleFonts.inter(color: textColor.withOpacity(0.4), fontSize: w * (12.0 / 375)),
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: h * (16.2 / 810)),
             ],
           ),
         ),
@@ -165,32 +168,40 @@ class _PostingWindowScreenState extends State<PostingWindowScreen> {
   }
 }
 
-// CountdownUnit remains the same (Stateless)
 class CountdownUnit extends StatelessWidget {
   final String value, label;
   final Color color;
-  const CountdownUnit({super.key, required this.value, required this.label, required this.color});
+  final double w;
+  final double h;
+
+  const CountdownUnit({
+    super.key,
+    required this.value,
+    required this.label,
+    required this.color,
+    required this.w,
+    required this.h,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Aapki UI ke mutabiq Circular design ke liye hum yahan border add kar sakte hain
         Container(
-          padding: const EdgeInsets.all(10),
+          padding: EdgeInsets.all(w * (10.0 / 375)),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(color: color.withOpacity(0.1), width: 1),
+            border: Border.all(color: color.withOpacity(0.1), width: w * (1.0 / 375)),
           ),
           child: Text(
             value,
-            style: GoogleFonts.inter(fontSize: 24, fontWeight: FontWeight.w900, color: color),
+            style: GoogleFonts.inter(fontSize: w * (24.0 / 375), fontWeight: FontWeight.w900, color: color),
           ),
         ),
-        const SizedBox(height: 5),
+        SizedBox(height: h * (4.05 / 810)),
         Text(
           label,
-          style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w500, color: color.withOpacity(0.5)),
+          style: GoogleFonts.inter(fontSize: w * (10.0 / 375), fontWeight: FontWeight.w500, color: color.withOpacity(0.5)),
         ),
       ],
     );

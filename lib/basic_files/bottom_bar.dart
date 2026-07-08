@@ -9,7 +9,9 @@ import 'package:highlights/main_pages/home_screen.dart';
 import 'package:highlights/main_pages/post_creation_screen.dart';
 import 'package:highlights/main_pages/post_lock_screen.dart';
 import 'package:highlights/main_pages/profile_screen.dart';
-
+import 'package:get/get.dart';
+import '../Contollers/chat_controller.dart';
+import '../Contollers/profile_controller.dart';
 import '../Services/time_services.dart';
 
 class MainScreen extends StatefulWidget {
@@ -20,13 +22,21 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  static const int _chatTabIndex = 3;
+
+  @override
+  void initState() {
+    super.initState();
+    ProfileController.getProfileStats();
+  }
+
   int _currentIndex = 0;
 
   final List<Widget> _pages = [
     const HomeScreen(),
     ExploreScreen(),
     const PostCreationScreen(),
-    const ChatScreen(),
+    const ChatListScreen(),
     const ProfileScreen(),
   ];
 
@@ -65,20 +75,17 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Widget _buildBottomNavBar(Color navBarColor, Color iconDefaultColor) {
-    final size = MediaQuery
-        .of(context)
-        .size;
+    // --- MEDIA QUERY VARIABLES ---
+    final Size size = MediaQuery.of(context).size;
+    final double h = size.height;
+    final double w = size.width;
 
     return Container(
-      height: 87,
+      height: h * 0.107, // Responsive Bottom Bar Height
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: EdgeInsets.symmetric(horizontal: w * 0.055), // Responsive Horizontal Padding
       decoration: BoxDecoration(
         color: navBarColor,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(48),
-          topRight: Radius.circular(48),
-        ),
         // Subtle shadow for light mode visibility
         boxShadow: [
           BoxShadow(
@@ -91,39 +98,42 @@ class _MainScreenState extends State<MainScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: List.generate(icons.length, (index) {
-          return _navItem(index, icons[index], iconDefaultColor);
+          return _navItem(index, icons[index], iconDefaultColor, h, w);
         }),
       ),
     );
   }
 
-  Widget _navItem(int index, String iconPath, Color iconDefaultColor) {
+  Widget _navItem(int index, String iconPath, Color iconDefaultColor, double h, double w) {
     bool isActive = _currentIndex == index;
 
     return GestureDetector(
       onTap: () {
-        // --- CLIENT REQUIREMENT LOGIC START ---
-        // Index 2 hamara 'PostCreation' wala icon hai (Plus icon)
-        if (index == 2) {
-          if (!TimeService.isPostingWindowOpen()) {
-            // Agar window band hai (Mon-Thu), toh PostLockScreen par bhejo
-            Get.to(
-                  () => PostingWindowScreen(),
-              transition: Transition.fadeIn, // Smooth transition ke liye
-            );
-            return; // Function ko yahin rok dein taake screen switch na ho
-          }
+      // --- CLIENT REQUIREMENT LOGIC START ---
+      // Index 2 hamara 'PostCreation' wala icon hai (Plus icon)
+      // if (index == 2) {
+      //   if (!TimeService.isPostingWindowOpen()) {
+      //     // Agar window band hai (Mon-Thu), toh PostLockScreen par bhejo
+      //     Get.to(
+      //           () => PostingWindowScreen(),
+      //       transition: Transition.fadeIn, // Smooth transition ke liye
+      //     );
+      //     return; // Function ko yahin rok dein taake screen switch na ho
+      //   }
+      // }
+      // --- CLIENT REQUIREMENT LOGIC END ---
+        if (index == _chatTabIndex && _currentIndex != _chatTabIndex) {
+          Get.find<ChatController>().fetchMyConversations();
         }
-        // --- CLIENT REQUIREMENT LOGIC END ---
 
-        setState(() {
-          _currentIndex = index;
-        });
-      },
+      setState(() {
+        _currentIndex = index;
+      });
+    },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
-        height: 46,
-        width: 46,
+        height: h * 0.06, // Responsive Item Height
+        width: h * 0.06,  // Kept 1:1 ratio for perfect circle shape
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           gradient: isActive
@@ -137,10 +147,10 @@ class _MainScreenState extends State<MainScreen> {
         child: Center(
           child: SvgPicture.asset(
             iconPath,
-            height: 20,
-            width: 20,
+            height: h * 0.028, // Responsive Svg Height
+            width: h * 0.028,  // Responsive Svg Width
             colorFilter: ColorFilter.mode(
-              isActive ? Colors.white : iconDefaultColor,
+              isActive ? Colors.white : Colors.white,
               BlendMode.srcIn,
             ),
           ),

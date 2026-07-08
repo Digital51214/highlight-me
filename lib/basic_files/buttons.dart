@@ -1,100 +1,72 @@
-// import 'package:flutter/material.dart';
-// import 'package:google_fonts/google_fonts.dart';
-//
-// class RoundButton extends StatelessWidget {
-//   final String text;
-//   final VoidCallback onTap;
-//
-//   const RoundButton({super.key, required this.text, required this.onTap});
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     final screenWidth = MediaQuery.of(context).size.width;
-//
-//     return
-//       GestureDetector(
-//       onTap: onTap,
-//       child: Container(
-//         width: 333,
-//         height: 45,
-//         decoration: BoxDecoration(
-//           color: const Color(0xFF4F98A7),
-//           borderRadius: BorderRadius.circular(screenWidth * 0.1),
-//         ),
-//         child: Center(
-//           child: Row(
-//             mainAxisSize: MainAxisSize.min,
-//             children: [
-//               Text(
-//                 text,
-//                 style: GoogleFonts.inter(
-//                   fontSize: 16,
-//                   fontWeight: FontWeight.w700,
-//                   color: Colors.white,
-//                   fontStyle: FontStyle.italic,
-//                 ),
-//               ),
-//               const SizedBox(width: 6),
-//
-//               /// 👉 Arrow Icon
-//               const Icon(
-//                 Icons.arrow_forward,
-//                 color: Colors.white,
-//                 size: 18,
-//               ),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class RoundButton extends StatelessWidget {
   final String text;
   final VoidCallback onTap;
+  final bool isLoading;
+  final bool showArrow;
 
-  const RoundButton({super.key, required this.text, required this.onTap});
+  const RoundButton({
+    super.key,
+    required this.text,
+    required this.onTap,
+    this.isLoading = false,  // default: loader nahi
+    this.showArrow = true,   // default: arrow dikhega (SignUp/Login)
+  });
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-
-    // Theme Reference
+    // --- MEDIA QUERY VARIABLES ---
+    final screenWidth  = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
     final Color primaryColor = Theme.of(context).primaryColor;
 
     return GestureDetector(
-      onTap: onTap,
+      // ✅ Loading ho to tap disable
+      onTap: isLoading ? null : onTap,
       child: Container(
-        width: 333,
-        height: 45,
+        width:  screenWidth,
+        height: screenHeight * 0.074, // Already responsive
         decoration: BoxDecoration(
-          color: primaryColor, // Ab ye theme se color uthayega
+          color:        primaryColor,
           borderRadius: BorderRadius.circular(screenWidth * 0.1),
+          boxShadow: const [
+            BoxShadow(
+              color:      Color(0xFF4F98A7),
+              blurRadius: 5,
+            ),
+          ],
         ),
         child: Center(
-          child: Row(
+          child: isLoading
+              ? SpinKitCircle(
+            color: Colors.white,
+            size:  screenHeight * 0.042, // Already responsive
+          )
+              : Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 text,
                 style: GoogleFonts.inter(
-                  fontSize: 16,
+                  fontSize: screenHeight * 0.023,
                   fontWeight: FontWeight.w700,
-                  color: Colors.white, // Button text white hi rahega contrast ke liye
-                  fontStyle: FontStyle.italic,
+                  color: Colors.white,
                 ),
               ),
-              const SizedBox(width: 6),
-
-              /// 👉 Arrow Icon
-              const Icon(
-                Icons.arrow_forward,
-                color: Colors.white,
-                size: 18,
-              ),
+              if (showArrow) ...[
+                SizedBox(width: screenWidth * 0.016),
+                Icon(
+                  Icons.arrow_forward,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  size:  screenHeight * 0.023,
+                ),
+              ],
             ],
           ),
         ),

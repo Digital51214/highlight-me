@@ -100,7 +100,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                       child: Container(
                         padding: EdgeInsets.all(w * 0.06),
                         width: w * 0.85,
-                        height: h * 0.45,
+                        height: h * 0.5,
                         decoration: BoxDecoration(
                           color: Colors.black.withOpacity(0.4),
                           borderRadius: BorderRadius.circular(70),
@@ -109,7 +109,6 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             SizedBox(height: h * 0.02),
-
                             Text(
                               item["titleTop"],
                               style: MainTextStyles.inter(

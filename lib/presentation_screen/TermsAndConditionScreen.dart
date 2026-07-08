@@ -1,345 +1,3 @@
-// import 'package:flutter/material.dart';
-// import 'package:get/get.dart';
-// import 'package:highlights/auth_screen/sign_up.dart';
-// import 'package:highlights/presentation_screen/ForgetPasswordScreen.dart';
-// import 'package:highlights/widgets/Backbutton.dart';
-//
-// class TermsandConditionscreen extends StatefulWidget {
-//   const TermsandConditionscreen({super.key});
-//
-//   @override
-//   State<TermsandConditionscreen> createState() =>
-//       _TermsandConditionscreenState();
-// }
-//
-// class _TermsandConditionscreenState extends State<TermsandConditionscreen> {
-//   bool isAccepted = false;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     final size = MediaQuery.of(context).size;
-//
-//     return Scaffold(
-//       backgroundColor: const Color(0xff0F1012),
-//       body: SafeArea(
-//         child: Column(
-//           children: [
-//             Expanded(
-//               child: SingleChildScrollView(
-//                 padding: EdgeInsets.symmetric(
-//                   horizontal: size.width * 0.055,
-//                   vertical: size.height * 0.012,
-//                 ),
-//                 child: Column(
-//                   crossAxisAlignment: CrossAxisAlignment.start,
-//                   children: [
-//                     SizedBox(height: size.height * 0.01),
-//
-//                     const CustomBackButtonWidget(),
-//
-//                     SizedBox(height: size.height * 0.035),
-//
-//                     Text(
-//                       "Terms & Conditions",
-//                       style: TextStyle(
-//                         color: Colors.white,
-//                         fontSize: size.width * 0.065,
-//                         fontWeight: FontWeight.w800,
-//                         height: 1.1,
-//                       ),
-//                     ),
-//
-//                     SizedBox(height: size.height * 0.007),
-//
-//                     Text(
-//                       "Understand the rules for using our platform",
-//                       style: TextStyle(
-//                         color: Colors.white60,
-//                         fontSize: size.width * 0.036,
-//                         fontWeight: FontWeight.w400,
-//                       ),
-//                     ),
-//
-//                     SizedBox(height: size.height * 0.035),
-//
-//                     _buildBodyText(
-//                       size: size,
-//                       text:
-//                       "By accessing or using this application, you agree to comply with and be bound by these Terms & Conditions. If you do not agree, please refrain from using the service.",
-//                     ),
-//
-//                     SizedBox(height: size.height * 0.025),
-//
-//                     _buildBodyText(
-//                       size: size,
-//                       text:
-//                       "This platform allows users to share personal moments through photos and videos within a defined posting window. Content may only be uploaded between Monday 12:00 AM and Thursday 11:59 PM.\nAfter this period, all submitted content becomes automatically restricted and no longer publicly accessible.",
-//                     ),
-//
-//                     SizedBox(height: size.height * 0.025),
-//
-//                     _buildBodyText(
-//                       size: size,
-//                       text:
-//                       "You retain ownership of all content you upload. However, by posting, you grant the platform a limited license to host, display, and process your content solely for providing the service.",
-//                     ),
-//
-//                     SizedBox(height: size.height * 0.035),
-//
-//                     _buildSectionTitle(
-//                       size: size,
-//                       title: "Account & Security",
-//                     ),
-//
-//                     SizedBox(height: size.height * 0.01),
-//
-//                     _buildBodyText(
-//                       size: size,
-//                       text:
-//                       "Users are responsible for maintaining the confidentiality of their account credentials and for all activities that occur under their account.",
-//                     ),
-//
-//                     SizedBox(height: size.height * 0.03),
-//
-//                     _buildSectionTitle(
-//                       size: size,
-//                       title: "Restrictions & Enforcement",
-//                     ),
-//
-//                     SizedBox(height: size.height * 0.01),
-//
-//                     _buildBodyText(
-//                       size: size,
-//                       text: "We reserve the right to:",
-//                     ),
-//
-//                     SizedBox(height: size.height * 0.007),
-//
-//                     _buildBulletText(
-//                       size: size,
-//                       text: "Remove content that violates these terms",
-//                     ),
-//                     _buildBulletText(
-//                       size: size,
-//                       text: "Restrict or suspend accounts involved in misuse",
-//                     ),
-//                     _buildBulletText(
-//                       size: size,
-//                       text: "Take necessary action to maintain a safe environment",
-//                     ),
-//
-//                     SizedBox(height: size.height * 0.03),
-//
-//                     _buildAgreementRow(size),
-//
-//                     SizedBox(height: size.height * 0.03),
-//                   ],
-//                 ),
-//               ),
-//             ),
-//
-//             /// Fixed Bottom Button Area
-//             Container(
-//               width: double.infinity,
-//               color: const Color(0xff0F1012),
-//               padding: EdgeInsets.only(
-//                 left: size.width * 0.055,
-//                 right: size.width * 0.055,
-//                 top: size.height * 0.01,
-//                 bottom: size.height * 0.025,
-//               ),
-//               child: _buildAcceptButton(size),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-//
-//   Widget _buildSectionTitle({
-//     required Size size,
-//     required String title,
-//   }) {
-//     return Text(
-//       title,
-//       style: TextStyle(
-//         color: Colors.white,
-//         fontSize: size.width * 0.042,
-//         fontWeight: FontWeight.w500,
-//         height: 1.2,
-//       ),
-//     );
-//   }
-//
-//   Widget _buildBodyText({
-//     required Size size,
-//     required String text,
-//   }) {
-//     return Text(
-//       text,
-//       style: TextStyle(
-//         color: Colors.white38,
-//         fontSize: size.width * 0.0325,
-//         fontWeight: FontWeight.w400,
-//         height: 1.2,
-//       ),
-//     );
-//   }
-//
-//   Widget _buildBulletText({
-//     required Size size,
-//     required String text,
-//   }) {
-//     return Row(
-//       crossAxisAlignment: CrossAxisAlignment.start,
-//       children: [
-//         Padding(
-//           padding: EdgeInsets.only(
-//             top: size.height * 0.001,
-//             right: size.width * 0.025,
-//           ),
-//           child: Text(
-//             "•",
-//             style: TextStyle(
-//               color: Colors.white38,
-//               fontSize: size.width * 0.05,
-//               fontWeight: FontWeight.w400,
-//               height: 1,
-//             ),
-//           ),
-//         ),
-//         Expanded(
-//           child: Text(
-//             text,
-//             style: TextStyle(
-//               color: Colors.white38,
-//               fontSize: size.width * 0.0325,
-//               fontWeight: FontWeight.w400,
-//               height: 1.15,
-//             ),
-//           ),
-//         ),
-//       ],
-//     );
-//   }
-//
-//   Widget _buildAgreementRow(Size size) {
-//     return Row(
-//       crossAxisAlignment: CrossAxisAlignment.start,
-//       children: [
-//         GestureDetector(
-//           onTap: () {
-//             setState(() {
-//               isAccepted = !isAccepted;
-//             });
-//           },
-//           child: AnimatedContainer(
-//             duration: const Duration(milliseconds: 180),
-//             height: size.width * 0.06,
-//             width: size.width * 0.06,
-//             decoration: BoxDecoration(
-//               shape: BoxShape.circle,
-//               color: isAccepted
-//                   ? const Color(0xff4F98A7)
-//                   : Colors.transparent,
-//               border: Border.all(
-//                 color: isAccepted
-//                     ? const Color(0xff4F98A7)
-//                     : Colors.white38,
-//                 width: size.width * 0.003,
-//               ),
-//             ),
-//             child: isAccepted
-//                 ? Icon(
-//               Icons.check,
-//               color: Colors.white,
-//               size: size.width * 0.04,
-//             )
-//                 : null,
-//           ),
-//         ),
-//         SizedBox(width: size.width * 0.025),
-//         Expanded(
-//           child: Padding(
-//             padding: EdgeInsets.only(top: size.height * 0.002),
-//             child: RichText(
-//               text: TextSpan(
-//                 style: TextStyle(
-//                   color: Colors.white54,
-//                   fontSize: size.width * 0.029,
-//                   fontWeight: FontWeight.w400,
-//                   height: 1.4,
-//                 ),
-//                 children: const [
-//                   TextSpan(text: "I agree with all "),
-//                   TextSpan(
-//                     text: "Terms & Conditions",
-//                     style: TextStyle(
-//                       color: Color(0xff4F98A7),
-//                       decoration: TextDecoration.underline,
-//                       decorationColor: Color(0xff4F98A7),
-//                       fontWeight: FontWeight.w600,
-//                     ),
-//                   ),
-//                   TextSpan(text: " and "),
-//                   TextSpan(
-//                     text: "Privacy Policy",
-//                     style: TextStyle(
-//                       color: Color(0xff4F98A7),
-//                       decoration: TextDecoration.underline,
-//                       decorationColor: Color(0xff4F98A7),
-//                       fontWeight: FontWeight.w600,
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//             ),
-//           ),
-//         ),
-//       ],
-//     );
-//   }
-//
-//   Widget _buildAcceptButton(Size size) {
-//     return GestureDetector(
-//       onTap: isAccepted
-//           ? () {
-//         Get.back();
-//       }
-//           : null,
-//       child: AnimatedContainer(
-//         duration: const Duration(milliseconds: 180),
-//         width: double.infinity,
-//         height: size.height * 0.058,
-//         decoration: BoxDecoration(
-//           color: isAccepted
-//               ? const Color(0xff62AFC1)
-//               : const Color(0xff62AFC1).withOpacity(0.35),
-//           borderRadius: BorderRadius.circular(size.width * 0.09),
-//           boxShadow: isAccepted
-//               ? [
-//             BoxShadow(
-//               color: const Color(0xff62AFC1).withOpacity(0.35),
-//               blurRadius: size.width * 0.04,
-//               spreadRadius: 1,
-//             ),
-//           ]
-//               : [],
-//         ),
-//         child: Center(
-//           child: Text(
-//             "Accept & Continue",
-//             style: TextStyle(
-//               color: Colors.white,
-//               fontSize: size.width * 0.05,
-//               fontWeight: FontWeight.w700,
-//             ),
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:highlights/widgets/Backbutton.dart';
@@ -357,7 +15,8 @@ class _TermsandConditionscreenState extends State<TermsandConditionscreen> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    double w = MediaQuery.of(context).size.width;
+    double h = MediaQuery.of(context).size.height;
 
     // Theme references
     final Color textColor = Theme.of(context).canvasColor;
@@ -372,122 +31,125 @@ class _TermsandConditionscreenState extends State<TermsandConditionscreen> {
             Expanded(
               child: SingleChildScrollView(
                 padding: EdgeInsets.symmetric(
-                  horizontal: size.width * 0.055,
-                  vertical: size.height * 0.012,
+                  horizontal: w * (20.625 / 375), // 0.055 scaled ratio
+                  vertical: h * (9.72 / 810),    // 0.012 scaled ratio
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(height: size.height * 0.01),
+                    SizedBox(height: h * (8.1 / 810)),
 
                     const CustomBackButtonWidget(),
 
-                    SizedBox(height: size.height * 0.035),
+                    SizedBox(height: h * (28.35 / 810)),
 
                     Text(
                       "Terms & Conditions",
                       style: TextStyle(
                         color: textColor,
-                        fontSize: size.width * 0.065,
+                        fontSize: w * (24.375 / 375), // Mapped from size.width * 0.065
                         fontWeight: FontWeight.w800,
                         height: 1.1,
                       ),
                     ),
 
-                    SizedBox(height: size.height * 0.007),
+                    SizedBox(height: h * (5.67 / 810)),
 
                     Text(
                       "Understand the rules for using our platform",
                       style: TextStyle(
                         color: textColor.withOpacity(0.6),
-                        fontSize: size.width * 0.036,
+                        fontSize: w * (13.5 / 375), // Mapped from size.width * 0.036
                         fontWeight: FontWeight.w400,
                       ),
                     ),
 
-                    SizedBox(height: size.height * 0.035),
+                    SizedBox(height: h * (28.35 / 810)),
 
                     _buildBodyText(
-                      size: size,
+                      w: w,
                       textColor: textColor,
                       text:
                       "By accessing or using this application, you agree to comply with and be bound by these Terms & Conditions. If you do not agree, please refrain from using the service.",
                     ),
 
-                    SizedBox(height: size.height * 0.025),
+                    SizedBox(height: h * (20.25 / 810)),
 
                     _buildBodyText(
-                      size: size,
+                      w: w,
                       textColor: textColor,
                       text:
                       "This platform allows users to share personal moments through photos and videos within a defined posting window. Content may only be uploaded between Monday 12:00 AM and Thursday 11:59 PM.\nAfter this period, all submitted content becomes automatically restricted and no longer publicly accessible.",
                     ),
 
-                    SizedBox(height: size.height * 0.025),
+                    SizedBox(height: h * (20.25 / 810)),
 
                     _buildBodyText(
-                      size: size,
+                      w: w,
                       textColor: textColor,
                       text:
                       "You retain ownership of all content you upload. However, by posting, you grant the platform a limited license to host, display, and process your content solely for providing the service.",
                     ),
 
-                    SizedBox(height: size.height * 0.035),
+                    SizedBox(height: h * (28.35 / 810)),
 
                     _buildSectionTitle(
-                      size: size,
+                      w: w,
                       textColor: textColor,
                       title: "Account & Security",
                     ),
 
-                    SizedBox(height: size.height * 0.01),
+                    SizedBox(height: h * (8.1 / 810)),
 
                     _buildBodyText(
-                      size: size,
+                      w: w,
                       textColor: textColor,
                       text:
                       "Users are responsible for maintaining the confidentiality of their account credentials and for all activities that occur under their account.",
                     ),
 
-                    SizedBox(height: size.height * 0.03),
+                    SizedBox(height: h * (24.3 / 810)),
 
                     _buildSectionTitle(
-                      size: size,
+                      w: w,
                       textColor: textColor,
                       title: "Restrictions & Enforcement",
                     ),
 
-                    SizedBox(height: size.height * 0.01),
+                    SizedBox(height: h * (8.1 / 810)),
 
                     _buildBodyText(
-                      size: size,
+                      w: w,
                       textColor: textColor,
                       text: "We reserve the right to:",
                     ),
 
-                    SizedBox(height: size.height * 0.007),
+                    SizedBox(height: h * (5.67 / 810)),
 
                     _buildBulletText(
-                      size: size,
+                      w: w,
+                      h: h,
                       textColor: textColor,
                       text: "Remove content that violates these terms",
                     ),
                     _buildBulletText(
-                      size: size,
+                      w: w,
+                      h: h,
                       textColor: textColor,
                       text: "Restrict or suspend accounts involved in misuse",
                     ),
                     _buildBulletText(
-                      size: size,
+                      w: w,
+                      h: h,
                       textColor: textColor,
                       text: "Take necessary action to maintain a safe environment",
                     ),
 
-                    SizedBox(height: size.height * 0.03),
+                    SizedBox(height: h * (24.3 / 810)),
 
-                    _buildAgreementRow(size, textColor, primaryColor),
+                    _buildAgreementRow(w, h, textColor, primaryColor),
 
-                    SizedBox(height: size.height * 0.03),
+                    SizedBox(height: h * (24.3 / 810)),
                   ],
                 ),
               ),
@@ -498,12 +160,12 @@ class _TermsandConditionscreenState extends State<TermsandConditionscreen> {
               width: double.infinity,
               color: bgColor,
               padding: EdgeInsets.only(
-                left: size.width * 0.055,
-                right: size.width * 0.055,
-                top: size.height * 0.01,
-                bottom: size.height * 0.025,
+                left: w * (20.625 / 375),
+                right: w * (20.625 / 375),
+                top: h * (8.1 / 810),
+                bottom: h * (20.25 / 810),
               ),
-              child: _buildAcceptButton(size, primaryColor),
+              child: _buildAcceptButton(w, h, primaryColor),
             ),
           ],
         ),
@@ -512,7 +174,7 @@ class _TermsandConditionscreenState extends State<TermsandConditionscreen> {
   }
 
   Widget _buildSectionTitle({
-    required Size size,
+    required double w,
     required String title,
     required Color textColor,
   }) {
@@ -520,7 +182,7 @@ class _TermsandConditionscreenState extends State<TermsandConditionscreen> {
       title,
       style: TextStyle(
         color: textColor,
-        fontSize: size.width * 0.042,
+        fontSize: w * (15.75 / 375), // Mapped from size.width * 0.042
         fontWeight: FontWeight.w500,
         height: 1.2,
       ),
@@ -528,7 +190,7 @@ class _TermsandConditionscreenState extends State<TermsandConditionscreen> {
   }
 
   Widget _buildBodyText({
-    required Size size,
+    required double w,
     required String text,
     required Color textColor,
   }) {
@@ -536,7 +198,7 @@ class _TermsandConditionscreenState extends State<TermsandConditionscreen> {
       text,
       style: TextStyle(
         color: textColor.withOpacity(0.5),
-        fontSize: size.width * 0.0325,
+        fontSize: w * (12.1875 / 375), // Mapped from size.width * 0.0325
         fontWeight: FontWeight.w400,
         height: 1.2,
       ),
@@ -544,7 +206,8 @@ class _TermsandConditionscreenState extends State<TermsandConditionscreen> {
   }
 
   Widget _buildBulletText({
-    required Size size,
+    required double w,
+    required double h,
     required String text,
     required Color textColor,
   }) {
@@ -553,14 +216,14 @@ class _TermsandConditionscreenState extends State<TermsandConditionscreen> {
       children: [
         Padding(
           padding: EdgeInsets.only(
-            top: size.height * 0.001,
-            right: size.width * 0.025,
+            top: h * (0.81 / 810),
+            right: w * (9.375 / 375),
           ),
           child: Text(
             "•",
             style: TextStyle(
               color: textColor.withOpacity(0.5),
-              fontSize: size.width * 0.05,
+              fontSize: w * (18.75 / 375), // Mapped from size.width * 0.05
               fontWeight: FontWeight.w400,
               height: 1,
             ),
@@ -571,7 +234,7 @@ class _TermsandConditionscreenState extends State<TermsandConditionscreen> {
             text,
             style: TextStyle(
               color: textColor.withOpacity(0.5),
-              fontSize: size.width * 0.0325,
+              fontSize: w * (12.1875 / 375),
               fontWeight: FontWeight.w400,
               height: 1.15,
             ),
@@ -581,7 +244,7 @@ class _TermsandConditionscreenState extends State<TermsandConditionscreen> {
     );
   }
 
-  Widget _buildAgreementRow(Size size, Color textColor, Color primaryColor) {
+  Widget _buildAgreementRow(double w, double h, Color textColor, Color primaryColor) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -593,38 +256,34 @@ class _TermsandConditionscreenState extends State<TermsandConditionscreen> {
           },
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 180),
-            height: size.width * 0.06,
-            width: size.width * 0.06,
+            height: w * (22.5 / 375), // Mapped from size.width * 0.06
+            width: w * (22.5 / 375),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: isAccepted
-                  ? primaryColor
-                  : Colors.transparent,
+              color: isAccepted ? primaryColor : Colors.transparent,
               border: Border.all(
-                color: isAccepted
-                    ? primaryColor
-                    : textColor.withOpacity(0.38),
-                width: size.width * 0.003,
+                color: isAccepted ? primaryColor : textColor.withOpacity(0.38),
+                width: w * (1.125 / 375), // Mapped from size.width * 0.003
               ),
             ),
             child: isAccepted
                 ? Icon(
               Icons.check,
               color: Colors.white,
-              size: size.width * 0.04,
+              size: w * (15.0 / 375), // Mapped from size.width * 0.04
             )
                 : null,
           ),
         ),
-        SizedBox(width: size.width * 0.025),
+        SizedBox(width: w * (9.375 / 375)),
         Expanded(
           child: Padding(
-            padding: EdgeInsets.only(top: size.height * 0.002),
+            padding: EdgeInsets.only(top: h * (1.62 / 810)),
             child: RichText(
               text: TextSpan(
                 style: TextStyle(
                   color: textColor.withOpacity(0.54),
-                  fontSize: size.width * 0.029,
+                  fontSize: w * (10.875 / 375), // Mapped from size.width * 0.029
                   fontWeight: FontWeight.w400,
                   height: 1.4,
                 ),
@@ -658,23 +317,21 @@ class _TermsandConditionscreenState extends State<TermsandConditionscreen> {
     );
   }
 
-  Widget _buildAcceptButton(Size size, Color primaryColor) {
+  Widget _buildAcceptButton(double w, double h, Color primaryColor) {
     return GestureDetector(
       onTap: isAccepted ? () => Get.back() : null,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         width: double.infinity,
-        height: size.height * 0.058,
+        height: h * (46.98 / 810), // Evaluated from size.height * 0.058
         decoration: BoxDecoration(
-          color: isAccepted
-              ? primaryColor
-              : primaryColor.withOpacity(0.35),
-          borderRadius: BorderRadius.circular(size.width * 0.09),
+          color: isAccepted ? primaryColor : primaryColor.withOpacity(0.35),
+          borderRadius: BorderRadius.circular(w * (33.75 / 375)), // Evaluated from size.width * 0.09
           boxShadow: isAccepted
               ? [
             BoxShadow(
               color: primaryColor.withOpacity(0.35),
-              blurRadius: size.width * 0.04,
+              blurRadius: w * (15.0 / 375),
               spreadRadius: 1,
             ),
           ]
@@ -685,7 +342,7 @@ class _TermsandConditionscreenState extends State<TermsandConditionscreen> {
             "Accept & Continue",
             style: TextStyle(
               color: Colors.white,
-              fontSize: size.width * 0.05,
+              fontSize: w * (18.75 / 375), // Mapped from size.width * 0.05
               fontWeight: FontWeight.w700,
             ),
           ),

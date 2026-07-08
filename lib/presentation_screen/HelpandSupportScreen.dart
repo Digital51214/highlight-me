@@ -307,7 +307,8 @@ class _HelpandSupportscreenState extends State<HelpandSupportscreen> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    double w = MediaQuery.of(context).size.width;
+    double h = MediaQuery.of(context).size.height;
 
     // Theme references
     final Color textColor = Theme.of(context).canvasColor;
@@ -319,54 +320,54 @@ class _HelpandSupportscreenState extends State<HelpandSupportscreen> {
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(
-            horizontal: size.width * 0.055,
-            vertical: size.height * 0.012,
+            horizontal: w * (20.625 / 375), // 0.055 scaled ratio
+            vertical: h * (9.72 / 810),    // 0.012 scaled ratio
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: size.height * 0.01),
+              SizedBox(height: h * (8.1 / 810)),
 
               const CustomBackButtonWidget(),
 
-              SizedBox(height: size.height * 0.03),
+              SizedBox(height: h * (24.3 / 810)),
 
               Text(
                 "Help & Support",
                 style: TextStyle(
                   color: textColor,
-                  fontSize: size.width * 0.065,
+                  fontSize: w * (24.375 / 375), // Mapped from size.width * 0.065
                   fontWeight: FontWeight.w800,
                   height: 1.1,
                 ),
               ),
 
-              SizedBox(height: size.height * 0.007),
+              SizedBox(height: h * (5.67 / 810)),
 
               Text(
                 "Find support when you need it",
                 style: TextStyle(
                   color: textColor.withOpacity(0.6),
-                  fontSize: size.width * 0.031,
+                  fontSize: w * (11.625 / 375), // Mapped from size.width * 0.031
                   fontWeight: FontWeight.w400,
                 ),
               ),
 
-              SizedBox(height: size.height * 0.035),
+              SizedBox(height: h * (28.35 / 810)),
 
-              _buildSupportBox(size, cardBgColor, textColor, primaryColor),
+              _buildSupportBox(w, h, cardBgColor, textColor, primaryColor),
 
-              SizedBox(height: size.height * 0.04),
+              SizedBox(height: h * (32.4 / 810)),
 
               ElevatedButton1(text: "Send", onPressed: (){
                 Get.back();
               }),
 
-              SizedBox(height: size.height * 0.14),
+              SizedBox(height: h * (113.4 / 810)), // Evaluated size.height * 0.14 conversion
 
-              _buildFooterBranding(size, textColor),
+              _buildFooterBranding(w, h, textColor),
 
-              SizedBox(height: size.height * 0.025),
+              SizedBox(height: h * (20.25 / 810)),
 
               Center(
                 child: GestureDetector(
@@ -377,14 +378,14 @@ class _HelpandSupportscreenState extends State<HelpandSupportscreen> {
                     "Privacy Policy",
                     style: TextStyle(
                       color: primaryColor,
-                      fontSize: size.width * 0.042,
+                      fontSize: w * (15.75 / 375), // Mapped from size.width * 0.042
                       fontWeight: FontWeight.w400,
                     ),
                   ),
                 ),
               ),
 
-              SizedBox(height: size.height * 0.018),
+              SizedBox(height: h * (14.58 / 810)),
 
               Center(
                 child: GestureDetector(
@@ -395,14 +396,14 @@ class _HelpandSupportscreenState extends State<HelpandSupportscreen> {
                     "Terms & Conditions",
                     style: TextStyle(
                       color: primaryColor,
-                      fontSize: size.width * 0.042,
+                      fontSize: w * (15.75 / 375),
                       fontWeight: FontWeight.w400,
                     ),
                   ),
                 ),
               ),
 
-              SizedBox(height: size.height * 0.03),
+              SizedBox(height: h * (24.3 / 810)),
             ],
           ),
         ),
@@ -410,13 +411,13 @@ class _HelpandSupportscreenState extends State<HelpandSupportscreen> {
     );
   }
 
-  Widget _buildSupportBox(Size size, Color cardBg, Color textC, Color primary) {
+  Widget _buildSupportBox(double w, double h, Color cardBg, Color textC, Color primary) {
     return Container(
       width: double.infinity,
-      height: size.height * 0.18,
+      height: h * (145.8 / 810), // Evaluated size.height * 0.18 conversion
       decoration: BoxDecoration(
         color: cardBg,
-        borderRadius: BorderRadius.circular(size.width * 0.07),
+        borderRadius: BorderRadius.circular(w * (26.25 / 375)),
       ),
       child: Stack(
         children: [
@@ -427,7 +428,7 @@ class _HelpandSupportscreenState extends State<HelpandSupportscreen> {
             onChanged: (value) => setState(() {}),
             style: TextStyle(
               color: textC,
-              fontSize: size.width * 0.035,
+              fontSize: w * (13.125 / 375),
               fontWeight: FontWeight.w500,
             ),
             cursorColor: primary,
@@ -436,37 +437,37 @@ class _HelpandSupportscreenState extends State<HelpandSupportscreen> {
               hintText: "Try asking: How can i.....",
               hintStyle: TextStyle(
                 color: textC.withOpacity(0.35),
-                fontSize: size.width * 0.035,
+                fontSize: w * (13.125 / 375),
                 fontWeight: FontWeight.w400,
               ),
               border: InputBorder.none,
               contentPadding: EdgeInsets.only(
-                left: size.width * 0.14,
-                right: size.width * 0.06,
-                top: size.height * 0.017,
-                bottom: size.height * 0.045,
+                left: w * (52.5 / 375),
+                right: w * (22.5 / 375),
+                top: h * (13.77 / 810),
+                bottom: h * (36.45 / 810),
               ),
             ),
           ),
 
           Positioned(
-            top: size.height * 0.018,
-            left: size.width * 0.04,
+            top: h * (14.58 / 810),
+            left: w * (15.0 / 375),
             child: Icon(
               Icons.search_rounded,
               color: textC.withOpacity(0.7),
-              size: size.width * 0.065,
+              size: w * (24.375 / 375),
             ),
           ),
 
           Positioned(
-            right: size.width * 0.05,
-            bottom: size.height * 0.018,
+            right: w * (18.75 / 375),
+            bottom: h * (14.58 / 810),
             child: Text(
               "${_messageController.text.length}/90",
               style: TextStyle(
                 color: textC.withOpacity(0.35),
-                fontSize: size.width * 0.035,
+                fontSize: w * (13.125 / 375),
                 fontWeight: FontWeight.w400,
               ),
             ),
@@ -476,16 +477,16 @@ class _HelpandSupportscreenState extends State<HelpandSupportscreen> {
     );
   }
 
-  Widget _buildFooterBranding(Size size, Color textColor) {
+  Widget _buildFooterBranding(double w, double h, Color textColor) {
     return Center(
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: size.width * 0.055,
-            height: size.width * 0.055,
+            width: w * (20.625 / 375),
+            height: w * (20.625 / 375),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(size.width * 0.012),
+              borderRadius: BorderRadius.circular(w * (4.5 / 375)),
               gradient: const LinearGradient(
                 colors: [Color(0xff6F5BFF), Color(0xff62AFC1)],
               ),
@@ -493,22 +494,22 @@ class _HelpandSupportscreenState extends State<HelpandSupportscreen> {
             child: Align(
               alignment: Alignment.centerLeft,
               child: Container(
-                margin: EdgeInsets.only(left: size.width * 0.008),
-                width: size.width * 0.016,
-                height: size.width * 0.04,
+                margin: EdgeInsets.only(left: w * (3.0 / 375)),
+                width: w * (6.0 / 375),
+                height: w * (15.0 / 375),
                 decoration: BoxDecoration(
                   color: Colors.black,
-                  borderRadius: BorderRadius.circular(size.width * 0.004),
+                  borderRadius: BorderRadius.circular(w * (1.5 / 375)),
                 ),
               ),
             ),
           ),
-          SizedBox(width: size.width * 0.02),
+          SizedBox(width: w * (7.5 / 375)),
           Text(
             "HIGHLIGHT | ME",
             style: TextStyle(
               color: textColor,
-              fontSize: size.width * 0.055,
+              fontSize: w * (20.625 / 375),
               fontWeight: FontWeight.w700,
               letterSpacing: 0.2,
             ),

@@ -4,7 +4,9 @@ import 'package:get/get.dart';
 import 'package:highlights/basic_files/basic_colors.dart';
 import 'package:highlights/on_boarding_screens/on_boardingscreen_one.dart';
 
+import '../Contollers/auth_controller.dart';
 import '../main_pages/live_stream.dart';
+import 'onboarding_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -18,12 +20,12 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
 
-    Timer(const Duration(seconds: 5), () {
+    Timer(const Duration(seconds: 3), () {
       if (!mounted) return;
-
-      Get.to(OnBoardingScreen(),
-        transition: Transition.noTransition,
-        duration: Duration.zero,);
+      Get.find<AuthController>().checkLoginStatus();
+      // Get.to(OnboardingScreen(),
+      //   transition: Transition.noTransition,
+      //   duration: Duration.zero,);
     });
   }
 

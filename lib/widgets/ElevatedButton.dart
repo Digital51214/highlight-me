@@ -63,31 +63,32 @@ class ElevatedButton1 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    double w = MediaQuery.of(context).size.width;
+    double h = MediaQuery.of(context).size.height;
 
     // Theme references
     final Color primaryColor = Theme.of(context).primaryColor;
 
     return SizedBox(
       width: double.infinity,
-      height: size.height * 0.058,
+      height: h * (46.98 / 810), // Evaluated from size.height * 0.058 scaling metrics
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: onPressed,
-          borderRadius: BorderRadius.circular(30),
+          borderRadius: BorderRadius.circular(w * (30.0 / 375)), // Dynamic corner radius scaling
           // Subtle feedback for better UX
           splashColor: Colors.white.withOpacity(0.1),
           highlightColor: Colors.white.withOpacity(0.05),
           child: Ink(
             decoration: BoxDecoration(
               color: primaryColor,
-              borderRadius: BorderRadius.circular(30),
+              borderRadius: BorderRadius.circular(w * (30.0 / 375)),
               boxShadow: [
                 BoxShadow(
                   color: primaryColor.withOpacity(0.3),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
+                  blurRadius: w * (12.0 / 375),
+                  offset: Offset(0, h * (4.0 / 810)),
                 ),
               ],
             ),
@@ -95,8 +96,8 @@ class ElevatedButton1 extends StatelessWidget {
               alignment: Alignment.center,
               child: Text(
                 text,
-                style: const TextStyle(
-                  fontSize: 14,
+                style: TextStyle(
+                  fontSize: w * (14.0 / 375), // Normalized text scaling from raw 14 points
                   fontWeight: FontWeight.bold,
                   fontFamily: "poppinbold",
                   color: Colors.white,

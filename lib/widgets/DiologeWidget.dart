@@ -1,6 +1,10 @@
+//
 // import 'package:flutter/material.dart';
 // import 'package:get/get.dart';
 // import 'package:highlights/auth_screen/login_screen.dart';
+//
+// import '../Contollers/auth_controller.dart';
+// import '../Services/session_manager.dart';
 //
 // class LogoutDialog extends StatelessWidget {
 //   final bool isDelete;
@@ -11,7 +15,8 @@
 //     return showDialog(
 //       context: context,
 //       barrierDismissible: true,
-//       barrierColor: Colors.black.withValues(alpha:0.65),
+//       // Barrier color ko bhi theme ke mutabiq dark rakha hai
+//       barrierColor: Colors.black.withValues(alpha: 0.7),
 //       builder: (_) => LogoutDialog(isDelete: isDelete),
 //     );
 //   }
@@ -22,21 +27,26 @@
 //     final double w = size.width;
 //     final double h = size.height;
 //
+//     // Theme references
+//     final Color textColor = Theme.of(context).canvasColor;
+//     final Color primaryColor = Theme.of(context).primaryColor;
+//     final Color dialogBg = Theme.of(context).cardColor;
+//
 //     return Dialog(
 //       backgroundColor: Colors.transparent,
 //       insetPadding: EdgeInsets.symmetric(horizontal: w * 0.07),
 //       child: Container(
 //         width: double.infinity,
 //         decoration: BoxDecoration(
-//           color: const Color(0xff1A1D21),
+//           color: dialogBg,
 //           borderRadius: BorderRadius.circular(28),
 //           border: Border.all(
-//             color: const Color(0xff2CCBFF).withValues(alpha:0.18),
+//             color: primaryColor.withValues(alpha: 0.18),
 //             width: 1.2,
 //           ),
 //           boxShadow: [
 //             BoxShadow(
-//               color: const Color(0xff2CCBFF).withValues(alpha:0.08),
+//               color: Colors.black.withValues(alpha: 0.2),
 //               blurRadius: 30,
 //               offset: const Offset(0, 10),
 //             ),
@@ -49,20 +59,21 @@
 //         child: Column(
 //           mainAxisSize: MainAxisSize.min,
 //           children: [
+//             // Top Icon Container
 //             Container(
 //               width: w * 0.2,
 //               height: w * 0.2,
 //               decoration: BoxDecoration(
 //                 shape: BoxShape.circle,
-//                 color: const Color(0xff20353A),
+//                 color: primaryColor.withValues(alpha: 0.12),
 //                 border: Border.all(
-//                   color: const Color(0xff2CCBFF).withValues(alpha:0.30),
+//                   color: primaryColor.withValues(alpha: 0.30),
 //                   width: 2,
 //                 ),
 //               ),
 //               child: Icon(
 //                 isDelete ? Icons.delete_forever_rounded : Icons.logout_rounded,
-//                 color: const Color(0xff36C4F1),
+//                 color: primaryColor,
 //                 size: w * 0.1,
 //               ),
 //             ),
@@ -74,7 +85,7 @@
 //               style: TextStyle(
 //                 fontSize: w * 0.058,
 //                 fontWeight: FontWeight.w800,
-//                 color: Colors.white,
+//                 color: textColor,
 //                 letterSpacing: -0.3,
 //               ),
 //             ),
@@ -89,7 +100,7 @@
 //               style: TextStyle(
 //                 fontSize: w * 0.038,
 //                 fontWeight: FontWeight.w400,
-//                 color: Colors.white.withValues(alpha:0.6),
+//                 color: textColor.withValues(alpha: 0.6),
 //                 height: 1.5,
 //               ),
 //             ),
@@ -98,16 +109,17 @@
 //
 //             Row(
 //               children: [
+//                 // Cancel Button
 //                 Expanded(
 //                   child: GestureDetector(
 //                     onTap: () => Navigator.pop(context),
 //                     child: Container(
 //                       height: h * 0.062,
 //                       decoration: BoxDecoration(
-//                         color: const Color(0xff2A2E33),
+//                         color: textColor.withValues(alpha: 0.05),
 //                         borderRadius: BorderRadius.circular(16),
 //                         border: Border.all(
-//                           color: Colors.white.withValues(alpha:0.08),
+//                           color: textColor.withValues(alpha: 0.1),
 //                           width: 1.2,
 //                         ),
 //                       ),
@@ -117,7 +129,7 @@
 //                           style: TextStyle(
 //                             fontSize: w * 0.04,
 //                             fontWeight: FontWeight.w600,
-//                             color: Colors.white70,
+//                             color: textColor.withValues(alpha: 0.7),
 //                           ),
 //                         ),
 //                       ),
@@ -127,28 +139,54 @@
 //
 //                 SizedBox(width: w * 0.04),
 //
+//                 // Confirm Action Button
 //                 Expanded(
 //                   child: GestureDetector(
 //                     onTap: () {
-//                       Navigator.push(
-//                           context, MaterialPageRoute(
-//                           builder: (context)=> LoginScreen())
-//                       );
+//                       // Logout Confirm Button Click logic handler
+//                       Future<void> handleAppLogout() async {
+//                         // 1. SharedPreferences saaf karein (Disk Flush)
+//                         await SessionManager.instance.clearSession();
 //
+//                         // 2. RAM Controller Memory clean karein (Crucial Reset)
+//                         if (Get.isRegistered<AuthController>()) {
+//                           final auth = Get.find<AuthController>();
+//                           auth.userName.value = '';
+//                           auth.userBio.value = '';
+//                           auth.userAvatar.value = '';
+//                           auth.userAvatarLocalPath.value = '';
+//
+//                           // Stats reset
+//                           auth.likesCount.value = 0;
+//                           auth.commentsCount.value = 0;
+//                           auth.sharesCount.value = 0;
+//                           auth.userRank.value = 0;
+//                           auth.foodSupport.value = 0;
+//                           auth.transportSupport.value = 0;
+//                           auth.cashReward.value = 0;
+//                         }
+//
+//                         // 3. Direct Splash/Login Screen par bhej dein flush stack ke sath
+//                         Get.offAllNamed('/login'); // Ya jo bhi aapki login screen ka path h
+//                       }
+//                       // Navigator.pop(context) zaroori hai dialog band karne ke liye
+//                       Navigator.pop(context);
+//                       // Get.offAll(() => const LoginScreen());
+//                       Get.find<AuthController>().logout();
 //                       if (isDelete) {
-//                         // TODO: Add delete account logic here
+//                         // TODO: Add delete account logic
 //                       } else {
-//                         // TODO: Add logout logic here
+//                         // TODO: Add logout logic
 //                       }
 //                     },
 //                     child: Container(
 //                       height: h * 0.062,
 //                       decoration: BoxDecoration(
-//                         color: const Color(0xff36C4F1),
+//                         color: primaryColor,
 //                         borderRadius: BorderRadius.circular(16),
 //                         boxShadow: [
 //                           BoxShadow(
-//                             color: const Color(0xff36C4F1).withValues(alpha:0.25),
+//                             color: primaryColor.withValues(alpha: 0.25),
 //                             blurRadius: 12,
 //                             offset: const Offset(0, 5),
 //                           ),
@@ -160,7 +198,8 @@
 //                           style: TextStyle(
 //                             fontSize: w * 0.04,
 //                             fontWeight: FontWeight.w700,
-//                             color: const Color(0xff0F1012),
+//                             // Button text color dark background par white/dark switch
+//                             color: Colors.white,
 //                           ),
 //                         ),
 //                       ),
@@ -178,6 +217,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:highlights/auth_screen/login_screen.dart';
+import '../Contollers/auth_controller.dart';
+import '../Services/session_manager.dart';
 
 class LogoutDialog extends StatelessWidget {
   final bool isDelete;
@@ -188,17 +229,15 @@ class LogoutDialog extends StatelessWidget {
     return showDialog(
       context: context,
       barrierDismissible: true,
-      // Barrier color ko bhi theme ke mutabiq dark rakha hai
-      barrierColor: Colors.black.withValues(alpha: 0.7),
+      barrierColor: Colors.black.withOpacity(0.7),
       builder: (_) => LogoutDialog(isDelete: isDelete),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final double w = size.width;
-    final double h = size.height;
+    double w = MediaQuery.of(context).size.width;
+    double h = MediaQuery.of(context).size.height;
 
     // Theme references
     final Color textColor = Theme.of(context).canvasColor;
@@ -207,63 +246,63 @@ class LogoutDialog extends StatelessWidget {
 
     return Dialog(
       backgroundColor: Colors.transparent,
-      insetPadding: EdgeInsets.symmetric(horizontal: w * 0.07),
+      insetPadding: EdgeInsets.symmetric(horizontal: w * (26.25 / 375)), // size.width * 0.07 mapped
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
           color: dialogBg,
-          borderRadius: BorderRadius.circular(28),
+          borderRadius: BorderRadius.circular(w * (28.0 / 375)), // Dynamic corner scaling
           border: Border.all(
-            color: primaryColor.withValues(alpha: 0.18),
-            width: 1.2,
+            color: primaryColor.withOpacity(0.18),
+            width: w * (1.2 / 375),
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.2),
-              blurRadius: 30,
-              offset: const Offset(0, 10),
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: w * (30.0 / 375),
+              offset: Offset(0, h * (10.0 / 810)),
             ),
           ],
         ),
         padding: EdgeInsets.symmetric(
-          horizontal: w * 0.07,
-          vertical: h * 0.035,
+          horizontal: w * (26.25 / 375), // size.width * 0.07 mapped
+          vertical: h * (28.35 / 810),   // size.height * 0.035 mapped
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             // Top Icon Container
             Container(
-              width: w * 0.2,
-              height: w * 0.2,
+              width: w * (75.0 / 375),  // size.width * 0.2 mapped
+              height: w * (75.0 / 375), // Sync width & height to maintain clean circular aspect bounds
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: primaryColor.withValues(alpha: 0.12),
+                color: primaryColor.withOpacity(0.12),
                 border: Border.all(
-                  color: primaryColor.withValues(alpha: 0.30),
-                  width: 2,
+                  color: primaryColor.withOpacity(0.30),
+                  width: w * (2.0 / 375),
                 ),
               ),
               child: Icon(
                 isDelete ? Icons.delete_forever_rounded : Icons.logout_rounded,
                 color: primaryColor,
-                size: w * 0.1,
+                size: w * (37.5 / 375), // size.width * 0.1 mapped
               ),
             ),
 
-            SizedBox(height: h * 0.025),
+            SizedBox(height: h * (20.25 / 810)),
 
             Text(
               isDelete ? 'Delete Account' : 'Logout',
               style: TextStyle(
-                fontSize: w * 0.058,
+                fontSize: w * (21.75 / 375), // size.width * 0.058 mapped
                 fontWeight: FontWeight.w800,
                 color: textColor,
                 letterSpacing: -0.3,
               ),
             ),
 
-            SizedBox(height: h * 0.012),
+            SizedBox(height: h * (9.72 / 810)),
 
             Text(
               isDelete
@@ -271,14 +310,14 @@ class LogoutDialog extends StatelessWidget {
                   : 'Are you sure you want to\nlog out of your account?',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: w * 0.038,
+                fontSize: w * (14.25 / 375), // size.width * 0.038 mapped
                 fontWeight: FontWeight.w400,
-                color: textColor.withValues(alpha: 0.6),
+                color: textColor.withOpacity(0.6),
                 height: 1.5,
               ),
             ),
 
-            SizedBox(height: h * 0.035),
+            SizedBox(height: h * (28.35 / 810)),
 
             Row(
               children: [
@@ -287,22 +326,22 @@ class LogoutDialog extends StatelessWidget {
                   child: GestureDetector(
                     onTap: () => Navigator.pop(context),
                     child: Container(
-                      height: h * 0.062,
+                      height: h * (50.22 / 810), // size.height * 0.062 mapped
                       decoration: BoxDecoration(
-                        color: textColor.withValues(alpha: 0.05),
-                        borderRadius: BorderRadius.circular(16),
+                        color: textColor.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(w * (16.0 / 375)),
                         border: Border.all(
-                          color: textColor.withValues(alpha: 0.1),
-                          width: 1.2,
+                          color: textColor.withOpacity(0.1),
+                          width: w * (1.2 / 375),
                         ),
                       ),
                       child: Center(
                         child: Text(
                           'Cancel',
                           style: TextStyle(
-                            fontSize: w * 0.04,
+                            fontSize: w * (15.0 / 375), // size.width * 0.04 mapped
                             fontWeight: FontWeight.w600,
-                            color: textColor.withValues(alpha: 0.7),
+                            color: textColor.withOpacity(0.7),
                           ),
                         ),
                       ),
@@ -310,32 +349,48 @@ class LogoutDialog extends StatelessWidget {
                   ),
                 ),
 
-                SizedBox(width: w * 0.04),
+                SizedBox(width: w * (15.0 / 375)), // size.width * 0.04 mapped
 
-                // Confirm Action Button
+                // Confirm Action Button (FIXED INLINE ASYNC)
                 Expanded(
                   child: GestureDetector(
-                    onTap: () {
-                      // Navigator.pop(context) zaroori hai dialog band karne ke liye
+                    onTap: () async {
                       Navigator.pop(context);
-                      Get.offAll(() => const LoginScreen());
 
                       if (isDelete) {
-                        // TODO: Add delete account logic
+                        // TODO: Add delete account api logic here if needed
                       } else {
-                        // TODO: Add logout logic
+                        await SessionManager.instance.clearSession();
+
+                        if (Get.isRegistered<AuthController>()) {
+                          final auth = Get.find<AuthController>();
+                          auth.userName.value = '';
+                          auth.userBio.value = '';
+                          auth.userAvatar.value = '';
+                          auth.userAvatarLocalPath.value = '';
+
+                          auth.likesCount.value = 0;
+                          auth.commentsCount.value = 0;
+                          auth.sharesCount.value = 0;
+                          auth.userRank.value = 0;
+                          auth.foodSupport.value = 0;
+                          auth.transportSupport.value = 0;
+                          auth.cashReward.value = 0;
+                        }
+
+                        Get.offAll(() => const LoginScreen(), transition: Transition.noTransition);
                       }
                     },
                     child: Container(
-                      height: h * 0.062,
+                      height: h * (50.22 / 810), // size.height * 0.062 mapped
                       decoration: BoxDecoration(
                         color: primaryColor,
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(w * (16.0 / 375)),
                         boxShadow: [
                           BoxShadow(
-                            color: primaryColor.withValues(alpha: 0.25),
-                            blurRadius: 12,
-                            offset: const Offset(0, 5),
+                            color: primaryColor.withOpacity(0.25),
+                            blurRadius: w * (12.0 / 375),
+                            offset: Offset(0, h * (5.0 / 810)),
                           ),
                         ],
                       ),
@@ -343,9 +398,8 @@ class LogoutDialog extends StatelessWidget {
                         child: Text(
                           isDelete ? 'Delete' : 'Logout',
                           style: TextStyle(
-                            fontSize: w * 0.04,
+                            fontSize: w * (15.0 / 375), // size.width * 0.04 mapped
                             fontWeight: FontWeight.w700,
-                            // Button text color dark background par white/dark switch
                             color: Colors.white,
                           ),
                         ),

@@ -197,6 +197,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:highlights/presentation_screen/PrivacyPolicyScreen.dart';
 import 'package:highlights/presentation_screen/TermsAndConditionScreen.dart';
+import 'package:highlights/presentation_screen/blocked_screen.dart';
 import 'package:highlights/widgets/Backbutton.dart';
 
 class Privacyscreen extends StatefulWidget {
@@ -211,7 +212,8 @@ class _PrivacyscreenState extends State<Privacyscreen> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    double w = MediaQuery.of(context).size.width;
+    double h = MediaQuery.of(context).size.height;
 
     // Theme references
     final Color textColor = Theme.of(context).canvasColor;
@@ -223,63 +225,48 @@ class _PrivacyscreenState extends State<Privacyscreen> {
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(
-            horizontal: size.width * 0.055,
-            vertical: size.height * 0.012,
+            horizontal: w * (20.625 / 375), // 0.055 scaled ratio
+            vertical: h * (9.72 / 810),    // 0.012 scaled ratio
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: size.height * 0.01),
+              SizedBox(height: h * (8.1 / 810)),
 
               const CustomBackButtonWidget(),
 
-              SizedBox(height: size.height * 0.035),
+              SizedBox(height: h * (28.35 / 810)),
 
               Text(
                 "Privacy",
                 style: TextStyle(
                   color: textColor,
-                  fontSize: size.width * 0.065,
+                  fontSize: w * (24.375 / 375), // Mapped from size.width * 0.065
                   fontWeight: FontWeight.w800,
                   height: 1.1,
                 ),
               ),
 
-              SizedBox(height: size.height * 0.007),
+              SizedBox(height: h * (5.67 / 810)),
 
               Text(
                 "Your account, protected and secure.",
                 style: TextStyle(
                   color: textColor.withOpacity(0.6),
-                  fontSize: size.width * 0.036,
+                  fontSize: w * (13.5 / 375), // Mapped from size.width * 0.036
                   fontWeight: FontWeight.w400,
                 ),
               ),
 
-              SizedBox(height: size.height * 0.035),
+              SizedBox(height: h * (28.35 / 810)),
 
-              _buildPrivateAccountTile(size, cardBgColor, textColor, primaryColor),
+              _buildPrivateAccountTile(w, h, cardBgColor, textColor, primaryColor),
 
-              SizedBox(height: size.height * 0.011),
-
-              _buildArrowTile(
-                size: size,
-                title: "Privacy Policy",
-                cardBg: cardBgColor,
-                textC: textColor,
-                onTap: () {
-                  Get.to(
-                    const PrivacyPolicyscreen(),
-                    transition: Transition.noTransition,
-                    duration: Duration.zero,
-                  );
-                },
-              ),
-
-              SizedBox(height: size.height * 0.011),
+              SizedBox(height: h * (8.91 / 810)),
 
               _buildArrowTile(
-                size: size,
+                w: w,
+                h: h,
                 title: "Terms & Conditions",
                 cardBg: cardBgColor,
                 textC: textColor,
@@ -291,6 +278,24 @@ class _PrivacyscreenState extends State<Privacyscreen> {
                   );
                 },
               ),
+              SizedBox(height: h * (8.91 / 810)),
+
+              _buildArrowTile(
+                w: w,
+                h: h,
+                title: "Blocked Accounts",
+                cardBg: cardBgColor,
+                textC: textColor,
+                onTap: () {
+                  Get.to(
+                    const BlockedScreen(),
+                    transition: Transition.noTransition,
+                    duration: Duration.zero,
+                  );
+                },
+              ),
+
+              SizedBox(height: h * (8.91 / 810)),
             ],
           ),
         ),
@@ -298,14 +303,14 @@ class _PrivacyscreenState extends State<Privacyscreen> {
     );
   }
 
-  Widget _buildPrivateAccountTile(Size size, Color cardBg, Color textC, Color primary) {
+  Widget _buildPrivateAccountTile(double w, double h, Color cardBg, Color textC, Color primary) {
     return Container(
       width: double.infinity,
-      height: size.height * 0.1,
-      padding: EdgeInsets.symmetric(horizontal: size.width * 0.065),
+      height: h * (81.0 / 810), // Evaluated size.height * 0.1 conversion
+      padding: EdgeInsets.symmetric(horizontal: w * (24.375 / 375)),
       decoration: BoxDecoration(
         color: cardBg,
-        borderRadius: BorderRadius.circular(size.width * 0.07),
+        borderRadius: BorderRadius.circular(w * (26.25 / 375)),
       ),
       child: Row(
         children: [
@@ -318,18 +323,18 @@ class _PrivacyscreenState extends State<Privacyscreen> {
                   "Private Account",
                   style: TextStyle(
                     color: textC,
-                    fontSize: size.width * 0.042,
+                    fontSize: w * (15.75 / 375), // Mapped from size.width * 0.042
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                SizedBox(height: size.height * 0.004),
+                SizedBox(height: h * (3.24 / 810)),
                 Text(
                   "When your account is public, your profile.....",
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: textC.withOpacity(0.4),
-                    fontSize: size.width * 0.026,
+                    fontSize: w * (9.75 / 375), // Mapped from size.width * 0.026
                     fontWeight: FontWeight.w400,
                   ),
                 ),
@@ -337,7 +342,7 @@ class _PrivacyscreenState extends State<Privacyscreen> {
             ),
           ),
           Transform.scale(
-            scale: size.width * 0.0024,
+            scale: w * (0.9 / 375), // Normalized switch transformation factor
             child: Switch(
               value: isPrivateAccount,
               onChanged: (value) => setState(() => isPrivateAccount = value),
@@ -354,7 +359,8 @@ class _PrivacyscreenState extends State<Privacyscreen> {
   }
 
   Widget _buildArrowTile({
-    required Size size,
+    required double w,
+    required double h,
     required String title,
     required Color cardBg,
     required Color textC,
@@ -364,22 +370,22 @@ class _PrivacyscreenState extends State<Privacyscreen> {
       onTap: onTap,
       child: Container(
         width: double.infinity,
-        height: size.height * 0.086,
-        padding: EdgeInsets.symmetric(horizontal: size.width * 0.05),
+        height: h * (69.66 / 810), // Evaluated size.height * 0.086 conversion
+        padding: EdgeInsets.symmetric(horizontal: w * (18.75 / 375)),
         decoration: BoxDecoration(
           color: cardBg,
-          borderRadius: BorderRadius.circular(size.width * 0.07),
+          borderRadius: BorderRadius.circular(w * (26.25 / 375)),
         ),
         child: Row(
           children: [
             Expanded(
               child: Padding(
-                padding: EdgeInsets.only(left: size.width * 0.04),
+                padding: EdgeInsets.only(left: w * (15.0 / 375)),
                 child: Text(
                   title,
                   style: TextStyle(
                     color: textC,
-                    fontSize: size.width * 0.042,
+                    fontSize: w * (15.75 / 375),
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -388,7 +394,7 @@ class _PrivacyscreenState extends State<Privacyscreen> {
             Icon(
               Icons.arrow_forward_ios_rounded,
               color: textC.withOpacity(0.7),
-              size: size.width * 0.055,
+              size: w * (20.625 / 375), // Mapped from size.width * 0.055
             ),
           ],
         ),
