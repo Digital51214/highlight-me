@@ -12,6 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
   video_player: ^2.9.2
+  camera: ^0.10.6
   visibility_detector: ^0.4.0+2
   cupertino_icons: ^1.0.8
   extended_image: ^8.3.0

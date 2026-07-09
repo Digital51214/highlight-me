@@ -5,6 +5,10 @@
     <key>NSPhotoLibraryUsageDescription</key>
     <string>This app needs access to your gallery</string>
     <key>NSCameraUsageDescription</key>
+    <key>NSCameraUsageDescription</key>
+    <string>Story banane ke liye camera chahiye</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Video story ke liye microphone chahiye</string>
     <string>This app needs access to your camera</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>

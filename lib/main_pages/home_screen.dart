@@ -1100,7 +1100,6 @@
 //     this.likeLoading   = false,
 //   });
 // }
-import 'dart:ffi';
 import 'dart:io';
 import 'dart:convert';
 import 'dart:async';
@@ -1115,10 +1114,13 @@ import 'package:visibility_detector/visibility_detector.dart';
 import '../Contollers/auth_controller.dart';
 import '../Contollers/post_controller.dart';
 import '../Contollers/chat_controller.dart';
+import '../Contollers/story_controller.dart';
 import '../Services/time_services.dart';
 import '../widgets/video_post_player.dart';
 import 'chat_screen2.dart';
 import 'post_viewer_screen.dart';
+import 'create_story_screen.dart';
+import 'story_viewer_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -1134,11 +1136,27 @@ class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<_ReelsScreenState> _reelsKey = GlobalKey<_ReelsScreenState>();
   final ScrollController _scrollController = ScrollController();
 
+  // ── Stories ──
+  final StoryController _storyCtrl = Get.isRegistered<StoryController>()
+      ? Get.find<StoryController>()
+      : Get.put(StoryController());
+  List<Map<String, dynamic>> _groupedStories = [];
+  bool _storiesLoading = true;
+  final Set<int> _viewedUserIds = {};
+
+  // ✅ NAYA — posts ki loading state bhi yahan track hoti hai
+  // (ReelsScreen callback se update karega)
+  bool _postsLoading = true;
+
+  // ✅ NAYA — combined check: jab tak dono khatam na ho, ek hi loader dikhao
+  bool get _isEverythingLoading => _storiesLoading || _postsLoading;
+
   @override
   void initState() {
     super.initState();
     _startTimer();
     _scrollController.addListener(_onScroll);
+    _loadStories();
   }
 
   void _onScroll() {
@@ -1164,10 +1182,66 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  Future<void> _loadStories() async {
+    if (mounted) setState(() => _storiesLoading = true);
+
+    final stories = await _storyCtrl.getStories();
+    final grouped = _storyCtrl.groupStoriesByUser(stories);
+
+    // 🕒 24-HOUR FILTER LOGIC
+    final now = DateTime.now();
+    final List<Map<String, dynamic>> validGroupedStories = [];
+
+    for (var group in grouped) {
+      final recentStories = (group['stories'] as List).where((story) {
+        final rawDate = story['created_at']?.toString();
+        if (rawDate == null || rawDate.isEmpty) return false;
+
+        try {
+          String normalized = rawDate.contains('T') ? rawDate : rawDate.replaceFirst(' ', 'T');
+          if (!normalized.endsWith('Z') && !normalized.contains('+')) {
+            normalized = '${normalized}Z';
+          }
+          final createdAt = DateTime.parse(normalized).toLocal();
+
+          final difference = now.difference(createdAt);
+          return difference.inHours < 24;
+        } catch (_) {
+          return false;
+        }
+      }).toList();
+
+
+      if (recentStories.isNotEmpty) {
+        validGroupedStories.add({
+          ...group,
+          'stories': recentStories,
+        });
+      }
+    }
+
+    if (mounted) {
+      setState(() {
+        _groupedStories = validGroupedStories; // Filter ki hui list UI ko de dein
+        _storiesLoading = false;
+      });
+    }
+  }
+
+  // ✅ NAYA — WidgetsBinding addPostFrameCallback ke sath
+  void _onPostsLoadingChanged(bool loading) {
+    // Is se Flutter current frame build karne ke baad setState call karega
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() => _postsLoading = loading);
+      }
+    });
+  }
+
   @override
   void dispose() {
     _timer?.cancel();
-    _scrollController.dispose(); // 👈 naya
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -1194,14 +1268,6 @@ class _HomeScreenState extends State<HomeScreen> {
     return const AssetImage('assets/images/h0.png');
   }
 
-  Set<int> selectedStories = {};
-  final List<String> storyImages = [
-    'assets/images/h1.png', 'assets/images/h2.png',
-    'assets/images/h3.png', 'assets/images/h4.png',
-    'assets/images/h1.png', 'assets/images/h2.png',
-    'assets/images/h3.png', 'assets/images/h4.png',
-  ];
-
   @override
   Widget build(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
@@ -1213,16 +1279,20 @@ class _HomeScreenState extends State<HomeScreen> {
         child: RefreshIndicator(
           color: Theme.of(context).primaryColor,
           onRefresh: () async {
-            await _reelsKey.currentState?._loadPosts();
+            // ✅ Refresh pe bhi combined loader dikhana hai to loading true karo
+            setState(() => _postsLoading = true);
+            await Future.wait([
+              _reelsKey.currentState?._loadPosts() ?? Future.value(),
+              _loadStories(),
+            ]);
           },
           child: SingleChildScrollView(
-            controller: _scrollController, // 👈 naya — pagination scroll detect karne ke liye
-            // ✅ FIX: NeverScrollableScrollPhysics hatao — yeh infinite loop ka cause tha
+            controller: _scrollController,
             physics: const AlwaysScrollableScrollPhysics(),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ── Header ──
+                // ── Header ── (hamesha turant dikhta hai — loader ka hissa nahi)
                 Obx(() => Padding(
                   padding: EdgeInsets.symmetric(
                       horizontal: w * (20.625 / 375),
@@ -1291,7 +1361,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 SizedBox(height: h * (20.25 / 810)),
 
-                // ── Timer Card ──
+                // ── Timer Card ── (hamesha turant dikhta hai)
                 Center(
                   child: Container(
                     width: w * (335.0 / 375),
@@ -1360,7 +1430,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 SizedBox(height: h * (16.2 / 810)),
 
-                // ── Stories ──
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: w * (20.625 / 375)),
                   child: Text('Trending Now',
@@ -1371,65 +1440,144 @@ class _HomeScreenState extends State<HomeScreen> {
                       )),
                 ),
                 SizedBox(height: h * (8.1 / 810)),
-                SizedBox(
-                  height: h * (90.0 / 810),
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    physics: const BouncingScrollPhysics(),
-                    itemCount: storyImages.length,
-                    itemBuilder: (context, index) {
-                      final bool isSelected = selectedStories.contains(index);
-                      return Padding(
-                        padding: EdgeInsets.symmetric(horizontal: w * (8.0 / 375)),
-                        child: GestureDetector(
-                          onTap: () => setState(() => selectedStories.add(index)),
-                          child: Stack(children: [
-                            Container(
-                              width: w * (69.0 / 375),
-                              height: w * (69.0 / 375),
-                              padding: EdgeInsets.all(w * (1.0 / 375)),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: isSelected ? Colors.grey : Theme.of(context).primaryColor,
-                                border: Border.all(
-                                  color: isSelected
-                                      ? Colors.grey
-                                      : Theme.of(context).primaryColor.withOpacity(0.5),
-                                  width: w * (2.0 / 375),
+
+                // ═══════════════════════════════════════════════
+                //  ✅ NAYA — SINGLE COMBINED LOADER
+                //  Jab tak stories AND posts dono load na ho jayein,
+                //  ek hi CustomLoader dikhta hai. Neeche wala
+                //  Offstage widget hamesha "mounted" rehta hai — is
+                //  se ReelsScreen ka apna data-fetch (initState) chalta
+                //  rehta hai background mein, sirf visually chhupa hota hai.
+                // ═══════════════════════════════════════════════
+                if (_isEverythingLoading)
+                  SizedBox(
+                    height: h * (490.0 / 810), // stories + kam se kam ek post jitni jagah
+                    child: const Center(child: CustomLoader()),
+                  ),
+
+                Offstage(
+                  offstage: _isEverythingLoading,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // ── Stories row ──
+                      SizedBox(
+                        height: h * (90.0 / 810),
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          physics: const BouncingScrollPhysics(),
+                          itemCount: _groupedStories.length + 1,
+                          itemBuilder: (context, index) {
+                            // ── Index 0: "Your Story" ──
+                            if (index == 0) {
+                              return Padding(
+                                padding: EdgeInsets.symmetric(horizontal: w * (8.0 / 375)),
+                                child: GestureDetector(
+                                  onTap: () async {
+                                    final posted = await Get.to(() => const CreateStoryScreen());
+                                    if (posted == true) {
+                                      // ✅ Ab hum HomeScreen pe wapas aa chuke hain —
+                                      // yahan snackbar dikhana properly visible rehta hai
+                                      // (camera screen ke transition ke beech disappear nahi hoti)
+                                      Get.snackbar(
+                                        'Success',
+                                        'Story posted successfully!',
+                                        snackPosition: SnackPosition.BOTTOM,
+                                        duration: const Duration(seconds: 2),
+                                      );
+                                      _loadStories();
+                                    }
+                                  },
+                                  child: Stack(children: [
+                                    Container(
+                                      width: w * (69.0 / 375),
+                                      height: w * (69.0 / 375),
+                                      padding: EdgeInsets.all(w * (1.0 / 375)),
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Theme.of(context).primaryColor.withOpacity(0.5),
+                                        border: Border.all(
+                                          color: Theme.of(context).primaryColor.withOpacity(0.5),
+                                          width: w * (2.0 / 375),
+                                        ),
+                                      ),
+                                      child: CircleAvatar(backgroundImage: _getAvatarProvider()),
+                                    ),
+                                    Positioned(
+                                      right: w * (5.0 / 375),
+                                      bottom: h * (10.0 / 810),
+                                      child: Container(
+                                        width: w * (22.0 / 375),
+                                        height: w * (22.0 / 375),
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Theme.of(context).canvasColor,
+                                        ),
+                                        child: Center(
+                                          child: Icon(Icons.add,
+                                              color: Theme.of(context).scaffoldBackgroundColor,
+                                              size: w * (16.0 / 375)),
+                                        ),
+                                      ),
+                                    ),
+                                  ]),
                                 ),
-                              ),
-                              child: CircleAvatar(
-                                  backgroundImage: AssetImage(storyImages[index])),
-                            ),
-                            if (index == 0)
-                              Positioned(
-                                right: w * (5.0 / 375),
-                                bottom: h * (10.0 / 810),
+                              );
+                            }
+
+                            // ── Baaki index: real users ki stories ──
+                            final group = _groupedStories[index - 1];
+                            final userId = group['user_id'] as int;
+                            final avatarUrl = group['user_avatar_url']?.toString() ?? '';
+                            final bool isViewed = _viewedUserIds.contains(userId);
+
+                            return Padding(
+                              padding: EdgeInsets.symmetric(horizontal: w * (8.0 / 375)),
+                              child: GestureDetector(
+                                onTap: () async {
+                                  setState(() => _viewedUserIds.add(userId));
+                                  await Get.to(() => StoryViewerScreen(
+                                    groupedStories: _groupedStories,
+                                    initialUserIndex: index - 1,
+                                  ));
+                                },
                                 child: Container(
-                                  width: w * (22.0 / 375),
-                                  height: w * (22.0 / 375),
+                                  width: w * (69.0 / 375),
+                                  height: w * (69.0 / 375),
+                                  padding: EdgeInsets.all(w * (1.0 / 375)),
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    color: Theme.of(context).canvasColor,
+                                    color: isViewed ? Colors.grey : Theme.of(context).primaryColor,
+                                    border: Border.all(
+                                      color: isViewed
+                                          ? Colors.grey
+                                          : Theme.of(context).primaryColor.withOpacity(0.5),
+                                      width: w * (2.0 / 375),
+                                    ),
                                   ),
-                                  child: Center(
-                                    child: Icon(Icons.add,
-                                        color: Theme.of(context).scaffoldBackgroundColor,
-                                        size: w * (16.0 / 375)),
+                                  child: CircleAvatar(
+                                    backgroundColor: Colors.grey.shade800,
+                                    backgroundImage: avatarUrl.startsWith('http')
+                                        ? CachedNetworkImageProvider(avatarUrl)
+                                        : const AssetImage('assets/images/h0.png') as ImageProvider,
                                   ),
                                 ),
                               ),
-                          ]),
+                            );
+                          },
                         ),
-                      );
-                    },
+                      ),
+
+                      SizedBox(height: h * (8.1 / 810)),
+
+                      // ── Posts Feed ──
+                      ReelsScreen(
+                        key: _reelsKey,
+                        onLoadingChanged: _onPostsLoadingChanged, // ✅ naya callback
+                      ),
+                    ],
                   ),
                 ),
-
-                SizedBox(height: h * (8.1 / 810)),
-
-                // ── Posts Feed ──
-                ReelsScreen(key: _reelsKey),
               ],
             ),
           ),
@@ -1443,7 +1591,11 @@ class _HomeScreenState extends State<HomeScreen> {
 //  ReelsScreen
 // ═══════════════════════════════════════════════════════════════
 class ReelsScreen extends StatefulWidget {
-  const ReelsScreen({super.key});
+  // ✅ naya — parent (HomeScreen) ko batata hai ke posts abhi load ho rahe
+  // hain ya khatam ho gaye, taake combined loader sahi trigger ho
+  final ValueChanged<bool>? onLoadingChanged;
+
+  const ReelsScreen({super.key, this.onLoadingChanged});
 
   @override
   State<ReelsScreen> createState() => _ReelsScreenState();
@@ -1451,46 +1603,32 @@ class ReelsScreen extends StatefulWidget {
 
 class _ReelsScreenState extends State<ReelsScreen> {
   List<Map<String, dynamic>> posts = [];
-
-  // ✅ Per-post local state — refresh tak yaad rakhta hai
-  // Map<postId, {liked, likesCount, commentsCount}>
   final Map<int, _PostLocalState> _localState = {};
 
   bool _isLoading = true;
   bool _hasError  = false;
-  // ✅ FIX: infinite loop rokne ke liye
   bool _isFetching = false;
 
-  // ── View tracking (naya) ─────────────────────────────────────
-  // ✅ FIX: views_count kabhi barhta hi nahi tha kyunki PostController.viewPost()
-  // ko kahin call hi nahi kiya ja raha tha. Ab jab bhi koi post pehli baar
-  // screen pe build ho (dikhe), ek dafa view count karte hain. Yeh Set track
-  // karta hai ke kis-kis post ka view already bheja ja chuka hai (isi session
-  // mein dobara dobara na bheje, warna views_count galat tarike se barh jayega)
   final Set<int> _viewedPostIds = {};
-
-  // ── Video autoplay/pause (naya) ──────────────────────────────
-  // ✅ Sirf ek hi post ka video ek waqt mein "active" (playing) hota hai —
-  // yeh woh post hai jo screen pe sab se zyada visible hai
   int? _currentlyPlayingPostId;
 
-  // ── Pagination (naya) ───────────────────────────────────────
-  static const int _pageLimit = 20; // backend jitna ek baar mein deta hai
-  bool _hasMore     = true;  // aur posts baaki hain ya nahi
+  static const int _pageLimit = 20;
+  bool _hasMore     = true;
   bool _isLoadingMore = false;
 
-  // ── Message feature (naya) ──────────────────────────────────
   List<bool> _messageLoading = [];
   final ChatController chatCtrl = Get.isRegistered<ChatController>()
       ? Get.find<ChatController>()
-      : Get.put(ChatController()); // 👈 agar ChatListScreen abhi tak open nahi hui to bhi safe
+      : Get.put(ChatController());
   int? _myUserId;
 
   @override
   void initState() {
     super.initState();
+    // ✅ Parent ko batao — loading shuru
+    widget.onLoadingChanged?.call(true);
     _loadPosts();
-    _loadMyUserId(); // 👈 naya
+    _loadMyUserId();
   }
 
   Future<void> _loadMyUserId() async {
@@ -1498,15 +1636,12 @@ class _ReelsScreenState extends State<ReelsScreen> {
     if (mounted) setState(() => _myUserId = id);
   }
 
-  // ─────────────────────────────────────────────
-  //  Load posts (pehla page — refresh pe bhi yehi chalta hai)
-  // ─────────────────────────────────────────────
   Future<void> _loadPosts() async {
-    // ✅ FIX: double call guard
     if (_isFetching) return;
     if (!mounted) return;
 
     _isFetching = true;
+    widget.onLoadingChanged?.call(true); // ✅ naya
     setState(() {
       _isLoading = true;
       _hasError  = false;
@@ -1517,27 +1652,21 @@ class _ReelsScreenState extends State<ReelsScreen> {
       debugPrint('[HomeScreen] posts fetched: ${result.length}');
 
       if (mounted) {
-        // ✅ Naye posts ke liye local state banao
-        // Purani liked state preserve karo agar same post dobara aaye
         for (final post in result) {
           final id = _parseInt(post['id'] ?? post['post_id']);
           if (!_localState.containsKey(id)) {
-            // Pehli baar — API se is_liked aur counts lo
             _localState[id] = _PostLocalState(
               liked:         post['is_liked'] == true,
               likesCount:    _parseInt(post['likes_count'] ?? post['likes'] ?? 0),
               commentsCount: _parseInt(post['comments_count'] ?? post['comments'] ?? 0),
             );
           }
-          // Agar already exist karta hai to purani liked/count state rakho
-          // (refresh pe like na gayab ho)
         }
 
         setState(() {
           posts           = result;
-          _messageLoading = List.filled(result.length, false); // 👈 naya
+          _messageLoading = List.filled(result.length, false);
           _isLoading      = false;
-          // ✅ agar pehle page mein hi limit se kam posts aaye, matlab aur nahi hain
           _hasMore        = result.length >= _pageLimit;
         });
       }
@@ -1551,15 +1680,11 @@ class _ReelsScreenState extends State<ReelsScreen> {
       }
     } finally {
       _isFetching = false;
+      widget.onLoadingChanged?.call(false); // ✅ naya — chahe success ho ya error, loading khatam
     }
   }
 
-  // ─────────────────────────────────────────────
-  //  Load MORE posts (agla page — scroll se trigger hota hai)
-  // ─────────────────────────────────────────────
   Future<void> _loadMorePosts() async {
-    // guard: pehle se load ho raha ho, ya aur posts hi na bache ho,
-    // ya list pehli baar load ho hi rahi ho — to kuch mat karo
     if (_isLoadingMore || !_hasMore || _isFetching || !mounted) return;
 
     setState(() => _isLoadingMore = true);
@@ -1567,13 +1692,12 @@ class _ReelsScreenState extends State<ReelsScreen> {
     try {
       final result = await PostController.getPostFeed(
         limit:  _pageLimit,
-        offset: posts.length, // 👈 jitne posts already load ho chuke hain, wahan se aage
+        offset: posts.length,
       );
       debugPrint('[HomeScreen] more posts fetched: ${result.length}');
 
       if (!mounted) return;
 
-      // Naye posts ke liye local state banao (jaise _loadPosts mein hota hai)
       for (final post in result) {
         final id = _parseInt(post['id'] ?? post['post_id']);
         if (!_localState.containsKey(id)) {
@@ -1589,7 +1713,6 @@ class _ReelsScreenState extends State<ReelsScreen> {
         posts.addAll(result);
         _messageLoading.addAll(List.filled(result.length, false));
         _isLoadingMore = false;
-        // ✅ agar is baar limit se kam posts aaye, matlab yeh aakhri page tha
         _hasMore = result.length >= _pageLimit;
       });
     } catch (e) {
@@ -1598,16 +1721,12 @@ class _ReelsScreenState extends State<ReelsScreen> {
     }
   }
 
-  // ─────────────────────────────────────────────
-  //  Like / Dislike
-  // ─────────────────────────────────────────────
   Future<void> _handleLike(int postId) async {
     final state = _localState[postId];
     if (state == null || state.likeLoading) return;
 
     final wasLiked = state.liked;
 
-    // Optimistic update — turant dikhao
     setState(() {
       state.liked      = !wasLiked;
       state.likesCount = wasLiked
@@ -1621,10 +1740,8 @@ class _ReelsScreenState extends State<ReelsScreen> {
     if (!mounted) return;
 
     if (result != null && result.success) {
-      // Success — loading hatao, count sahi rakho
       setState(() => state.likeLoading = false);
     } else {
-      // Fail — revert karo
       setState(() {
         state.liked      = wasLiked;
         state.likesCount = wasLiked
@@ -1635,12 +1752,7 @@ class _ReelsScreenState extends State<ReelsScreen> {
     }
   }
 
-  // ─────────────────────────────────────────────
-  //  Comment Dialog
-  //  ✅ RED SCREEN FIX: mounted check + dialogContext
-  // ─────────────────────────────────────────────
   Future<void> _showCommentDialog(int postId) async {
-    // ✅ context mounted check pehle
     if (!mounted) return;
 
     final double w = MediaQuery.of(context).size.width;
@@ -1651,13 +1763,8 @@ class _ReelsScreenState extends State<ReelsScreen> {
       context: context,
       barrierDismissible: true,
       builder: (dialogContext) {
-        // ✅ FIX: isPosting ab yahan (outer builder scope) declare kiya hai,
-        // isliye setDialogState() call hone par yeh reset nahi hoga —
-        // pehle yeh StatefulBuilder ke andar wale builder mein tha jo
-        // har rebuild pe wapas false ho jata tha (spinner kabhi dikhta hi nahi tha)
         bool isPosting = false;
 
-        // ✅ StatefulBuilder — dialog ke andar apna setState
         return StatefulBuilder(
           builder: (dialogContext, setDialogState) {
             return Dialog(
@@ -1696,7 +1803,6 @@ class _ReelsScreenState extends State<ReelsScreen> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         TextButton(
-                          // ✅ dialogContext use karo — red screen fix
                           onPressed: isPosting
                               ? null
                               : () => Navigator.of(dialogContext).pop(),
@@ -1714,11 +1820,6 @@ class _ReelsScreenState extends State<ReelsScreen> {
                             final text = commentCtrl.text.trim();
                             if (text.isEmpty) return;
 
-                            // ✅ FIX: dialog ab turant band nahi hota —
-                            // pehle spinner dikhao, request complete hone
-                            // do, phir hi band karo. Isse TextField/controller
-                            // request ke dauran zinda rehta hai — "used after
-                            // disposed" wali red-screen error yahi se aati thi.
                             setDialogState(() => isPosting = true);
 
                             final result = await PostController.addComment(
@@ -1730,7 +1831,6 @@ class _ReelsScreenState extends State<ReelsScreen> {
                               Navigator.of(dialogContext).pop();
                             }
 
-                            // ✅ Comment count locally update karo — refresh pe bhi rahega
                             if (result != null && result.success && mounted) {
                               setState(() {
                                 final state = _localState[postId];
@@ -1761,17 +1861,10 @@ class _ReelsScreenState extends State<ReelsScreen> {
       },
     );
 
-    // ✅ FIX: dialog ka exit-animation poora khatam hone ke liye chhota sa
-    // delay diya hai — is se pehle "controller used after disposed" error
-    // aata tha kyunki animation abhi chal raha hota tha jab dispose() call
-    // ho jata tha
     await Future.delayed(const Duration(milliseconds: 300));
     commentCtrl.dispose();
   }
 
-  // ─────────────────────────────────────────────
-  //  Share
-  // ─────────────────────────────────────────────
   Future<void> _handleShare(int postId, Map<String, dynamic> post) async {
     final caption  = post['caption']?.toString() ?? '';
     final location = post['location']?.toString() ?? '';
@@ -1787,9 +1880,6 @@ class _ReelsScreenState extends State<ReelsScreen> {
     await PostController.sharePost(postId: postId);
   }
 
-  // ─────────────────────────────────────────────
-  //  Message (naya)
-  // ─────────────────────────────────────────────
   Future<void> _handleMessage(int index) async {
     if (index < 0 || index >= _messageLoading.length) return;
     if (_messageLoading[index]) return;
@@ -1821,12 +1911,8 @@ class _ReelsScreenState extends State<ReelsScreen> {
         otherUserId: posterId,
       ));
     }
-    // conversation null aaye to createConversation() khud error snackbar dikha chuka hoga
   }
 
-  // ─────────────────────────────────────────────
-  //  Helpers
-  // ─────────────────────────────────────────────
   int _parseInt(dynamic val) {
     if (val == null) return 0;
     if (val is int) return val;
@@ -1849,11 +1935,6 @@ class _ReelsScreenState extends State<ReelsScreen> {
     return [];
   }
 
-  // ✅ naya — "14 MINS AGO", "2 HOURS AGO", "TODAY", "YESTERDAY", ya
-  // purani date ke liye "DD MMM YYYY". Backend UTC time bhejta hai
-  // (bina 'Z' marker ke), isliye pehle usay explicitly UTC declare
-  // kar ke .toLocal() se sahi device time mein convert karte hain
-  // (jaise chat_list_screen.dart mein bhi kiya tha).
   static const List<String> _monthNames = [
     'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
@@ -1870,7 +1951,7 @@ class _ReelsScreenState extends State<ReelsScreen> {
       }
       dt = DateTime.parse(normalized).toLocal();
     } catch (_) {
-      return rawDate; // parse fail ho to raw string hi dikha do
+      return rawDate;
     }
 
     final now  = DateTime.now();
@@ -1891,7 +1972,6 @@ class _ReelsScreenState extends State<ReelsScreen> {
     if (dayDiff == 1) return 'YESTERDAY';
     if (dayDiff < 7)  return '$dayDiff DAYS AGO';
 
-    // ✅ ek hafte se purani post — asal date dikhao
     final monthName = _monthNames[dt.month - 1];
     if (dt.year == now.year) return '${dt.day} $monthName';
     return '${dt.day} $monthName ${dt.year}';
@@ -1900,19 +1980,19 @@ class _ReelsScreenState extends State<ReelsScreen> {
   bool _isSameDay(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;
 
-  // ─────────────────────────────────────────────
-  //  BUILD
-  // ─────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
 
+    // ✅ NOTE: yeh apna ('_isLoading') CustomLoader ab yahan nahi dikhaya jaata —
+    // parent (HomeScreen) ab ek hi combined loader dikhata hai jab tak
+    // stories + posts dono ready na ho jayein (dekho HomeScreen ka Offstage).
+    // Isliye yahan sirf _isLoading == false hone ke baad hi kabhi render hoga
+    // (Offstage ke andar), lekin fir bhi hum yeh check rakhte hain taake agar
+    // kabhi standalone use ho to bhi crash na ho.
     if (_isLoading) {
-      return SizedBox(
-        height: h * (300.0 / 810),
-        child: const Center(child: CustomLoader()),
-      );
+      return const SizedBox.shrink();
     }
 
     if (_hasError) {
@@ -1962,15 +2042,11 @@ class _ReelsScreenState extends State<ReelsScreen> {
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      // ✅ FIX: cacheExtent kam karo — purane mobile ke liye
       cacheExtent: 200,
       addAutomaticKeepAlives: false,
       addRepaintBoundaries: true,
-      // ✅ Pagination: agar aur posts baaki hain to end mein ek extra
-      // "loading" item dikhao
       itemCount: posts.length + (_hasMore ? 1 : 0),
       itemBuilder: (context, index) {
-        // ✅ Yeh wala item asal post nahi, "loading more" indicator hai
         if (index >= posts.length) {
           return Padding(
             padding: EdgeInsets.symmetric(vertical: h * (20.0 / 810)),
@@ -1992,12 +2068,8 @@ class _ReelsScreenState extends State<ReelsScreen> {
         final post    = posts[index];
         final postId  = _parseInt(post['id'] ?? post['post_id']);
 
-        // ✅ FIX: is post ka view sirf ek dafa (is session mein) count karo
         if (postId != 0 && !_viewedPostIds.contains(postId)) {
           _viewedPostIds.add(postId);
-          // itemBuilder ke andar seedha setState/async call karne ki bajaye
-          // agla frame aane ke baad call karo — build ke dauran side-effect
-          // chalane se bachne ke liye
           WidgetsBinding.instance.addPostFrameCallback((_) {
             PostController.viewPost(postId: postId);
           });
@@ -2011,30 +2083,25 @@ class _ReelsScreenState extends State<ReelsScreen> {
         final userAvatarUrl = post['user_avatar_url'] ?? post['user']?['avatar_url'] ?? '';
         final postImageUrl  = post['file_url'] ?? post['display_url'] ?? '';
         final postType      = post['type']?.toString() ?? '';
-        // ✅ naya — username aur "14 MINS AGO" jaisa relative time
         final userName      = post['user_name']?.toString() ??
             post['username']?.toString() ?? 'User';
         final relativeTime  = _formatRelativeTime(createdAt?.toString());
-        final bool msgLoading = index < _messageLoading.length ? _messageLoading[index] : false; // 👈 naya
+        final bool msgLoading = index < _messageLoading.length ? _messageLoading[index] : false;
 
         return VisibilityDetector(
-          // ✅ naya — is post ki visibility track karta hai
           key: ValueKey('post-visibility-$postId'),
           onVisibilityChanged: (info) {
             if (!mounted) return;
             final visibleFraction = info.visibleFraction;
-            // ✅ 65%+ visible ho to yeh post "active" (playing) ban jati hai
             if (visibleFraction > 0.65) {
               if (_currentlyPlayingPostId != postId) {
                 setState(() => _currentlyPlayingPostId = postId);
               }
             } else if (_currentlyPlayingPostId == postId) {
-              // ✅ yehi post ab kaafi neeche/upar scroll ho chuki hai — pause
               setState(() => _currentlyPlayingPostId = null);
             }
           },
           child: GestureDetector(
-            // ✅ naya — post pe tap karo to TikTok jaisa full-screen viewer khule
             onTap: () => Get.to(
                   () => PostViewerScreen(posts: posts, initialIndex: index),
               transition: Transition.fadeIn,
@@ -2047,16 +2114,14 @@ class _ReelsScreenState extends State<ReelsScreen> {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(w * (25.0 / 375)),
                 child: Stack(children: [
-                  // ── Post image/video ──
                   Positioned.fill(
                     child: _buildPostImage(
                       postImageUrl,
                       postType,
-                      isActive: _currentlyPlayingPostId == postId, // 👈 naya
+                      isActive: _currentlyPlayingPostId == postId,
                     ),
                   ),
 
-                  // ── Gradient ──
                   Positioned.fill(
                     child: Container(
                       decoration: BoxDecoration(
@@ -2073,7 +2138,6 @@ class _ReelsScreenState extends State<ReelsScreen> {
                     ),
                   ),
 
-                  // ── User info top ──
                   Positioned(
                     top: h * (20.0 / 810),
                     left: w * (12.0 / 375),
@@ -2100,7 +2164,6 @@ class _ReelsScreenState extends State<ReelsScreen> {
                         ),
                       ),
                       SizedBox(width: w * (8.0 / 375)),
-                      // ✅ naya — username (bold) upar, time • location neeche
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -2135,12 +2198,10 @@ class _ReelsScreenState extends State<ReelsScreen> {
                     ]),
                   ),
 
-                  // ── Action buttons ──
                   Positioned(
                     right: w * (10.0 / 375),
                     bottom: h * (80.0 / 810),
                     child: Column(children: [
-                      // Like
                       Material(
                         color: Colors.transparent,
                         child: InkWell(
@@ -2168,7 +2229,6 @@ class _ReelsScreenState extends State<ReelsScreen> {
 
                       SizedBox(height: h * (12.0 / 810)),
 
-                      // Comment
                       Material(
                         color: Colors.transparent,
                         child: InkWell(
@@ -2186,7 +2246,6 @@ class _ReelsScreenState extends State<ReelsScreen> {
 
                       SizedBox(height: h * (12.0 / 810)),
 
-                      // Share
                       Material(
                         color: Colors.transparent,
                         child: InkWell(
@@ -2200,9 +2259,8 @@ class _ReelsScreenState extends State<ReelsScreen> {
                         ),
                       ),
 
-                      SizedBox(height: h * (12.0 / 810)), // 👈 gap kam kiya
+                      SizedBox(height: h * (12.0 / 810)),
 
-                      // ✅ Message — naya
                       Material(
                         color: Colors.transparent,
                         child: InkWell(
@@ -2225,7 +2283,6 @@ class _ReelsScreenState extends State<ReelsScreen> {
                     ]),
                   ),
 
-                  // ── Caption + Tags ──
                   Positioned(
                     bottom: h * (20.0 / 810),
                     left: w * (12.0 / 375),
@@ -2278,12 +2335,10 @@ class _ReelsScreenState extends State<ReelsScreen> {
   Widget _buildPostImage(String url, String postType, {required bool isActive}) {
     double w = MediaQuery.of(context).size.width;
     if (postType == 'video' || url.endsWith('.mp4') || url.endsWith('.mov')) {
-      // ✅ naya — ab sirf static icon nahi, asal video chalti hai jab
-      // yeh post screen pe visible ho (isActive)
       return VideoPostPlayer(
         videoUrl: url,
         isActive: isActive,
-        showMuteButton: isActive, // sirf jo abhi chal rahi ho usi pe mute button
+        showMuteButton: isActive,
       );
     }
     if (url.startsWith('http')) {
@@ -2307,7 +2362,7 @@ class _ReelsScreenState extends State<ReelsScreen> {
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  Per-post local state — session mein yaad rakhta hai
+//  Per-post local state
 // ═══════════════════════════════════════════════════════════════
 class _PostLocalState {
   bool liked;

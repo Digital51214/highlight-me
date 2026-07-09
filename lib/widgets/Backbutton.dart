@@ -68,7 +68,7 @@ class CustomBackButtonWidget extends StatelessWidget {
       },
       child: Container(
         height: w * (45.0 / 375), // Synchronized with height scaling using width factor to keep perfect circle
-        width: w * (45.0 / 375),  // Mapped from size.width * 0.12 scaling metrics
+        width: w * (45.0 / 375),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: Theme.of(context).primaryColor.withOpacity(0.15),
